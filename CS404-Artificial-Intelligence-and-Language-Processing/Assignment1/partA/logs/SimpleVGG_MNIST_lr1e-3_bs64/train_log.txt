@@ -1,0 +1,26 @@
+Experiment: SimpleVGG_MNIST_lr1e-3_bs64
+lr=0.001, batch_size=64, num_epochs=20, weight_decay=0.0001, patience=4, min_delta=1e-05
+
+[VGG] Epoch [1/20] LR=0.001, BS=64 | Train Loss=0.2666, Test Loss=0.1021, Test Acc=0.9722, Time=55.71s
+New best model at epoch 1 with acc 0.9722
+[VGG] Epoch [2/20] LR=0.001, BS=64 | Train Loss=0.0924, Test Loss=0.0920, Test Acc=0.9735, Time=50.89s
+New best model at epoch 2 with acc 0.9735
+[VGG] Epoch [3/20] LR=0.001, BS=64 | Train Loss=0.0783, Test Loss=0.0625, Test Acc=0.9819, Time=49.07s
+New best model at epoch 3 with acc 0.9819
+[VGG] Epoch [4/20] LR=0.001, BS=64 | Train Loss=0.0719, Test Loss=0.0683, Test Acc=0.9836, Time=48.05s
+New best model at epoch 4 with acc 0.9836
+[VGG] Epoch [5/20] LR=0.001, BS=64 | Train Loss=0.0641, Test Loss=0.0507, Test Acc=0.9865, Time=47.92s
+New best model at epoch 5 with acc 0.9865
+[VGG] Epoch [6/20] LR=0.001, BS=64 | Train Loss=0.0634, Test Loss=0.0375, Test Acc=0.9893, Time=47.87s
+New best model at epoch 6 with acc 0.9893
+[VGG] Epoch [7/20] LR=0.001, BS=64 | Train Loss=0.0566, Test Loss=0.0495, Test Acc=0.9879, Time=47.99s
+[VGG] Epoch [8/20] LR=0.001, BS=64 | Train Loss=0.0542, Test Loss=0.0355, Test Acc=0.9904, Time=47.95s
+New best model at epoch 8 with acc 0.9904
+[VGG] Epoch [9/20] LR=0.001, BS=64 | Train Loss=0.0501, Test Loss=0.0331, Test Acc=0.9917, Time=48.10s
+New best model at epoch 9 with acc 0.9917
+[VGG] Epoch [10/20] LR=0.001, BS=64 | Train Loss=0.0474, Test Loss=0.0430, Test Acc=0.9867, Time=48.28s
+[VGG] Epoch [11/20] LR=0.001, BS=64 | Train Loss=0.0475, Test Loss=0.0558, Test Acc=0.9839, Time=48.17s
+[VGG] Epoch [12/20] LR=0.001, BS=64 | Train Loss=0.0445, Test Loss=0.0272, Test Acc=0.9914, Time=48.22s
+[VGG] Epoch [13/20] LR=0.001, BS=64 | Train Loss=0.0398, Test Loss=0.0370, Test Acc=0.9900, Time=48.16s
+[VGG] Early stopping at epoch 13 (best epoch 9, best acc 0.9917)
+[VGG] Total training time: 640.42s, Best Acc=0.9917 at epoch 9

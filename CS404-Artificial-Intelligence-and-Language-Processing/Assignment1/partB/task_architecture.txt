@@ -1,0 +1,22 @@
+CrowdHuman
+
+应用场景人数，模型大小，硬件设备，推理速度，训练成本等等
+
+
+模型1：https://github.com/Shimmer93/MPCount 改造数据和模型，多任务
+@inproceedings{pengMPCount2024,
+  title = {Single Domain Generalization for Crowd Counting},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)},
+  author = {Peng, Zhuoxuan and Chan, S.-H. Gary},
+  year = {2024}
+}
+
+模型2：yolo11（记得引用！）识别到一个人，就count++
+
+评估指标：
+Detection accuracy
+False positives
+
+可视化需求：
+Drawing bounding boxes around detected people
+Displaying the final people count on the image

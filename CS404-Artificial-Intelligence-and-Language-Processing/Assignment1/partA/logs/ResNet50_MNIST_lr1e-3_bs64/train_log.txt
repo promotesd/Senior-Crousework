@@ -1,0 +1,32 @@
+Experiment: ResNet50_MNIST_lr1e-3_bs64
+lr=0.001, batch_size=64, num_epochs=20, weight_decay=0.0001, patience=4, min_delta=1e-05
+
+[ResNet] Epoch [1/20] LR=0.001, BS=64 | Train Loss=0.3442, Test Loss=0.0881, Test Acc=0.9746, Time=134.11s
+New best model at epoch 1 with acc 0.9746
+[ResNet] Epoch [2/20] LR=0.001, BS=64 | Train Loss=0.1396, Test Loss=0.0836, Test Acc=0.9763, Time=134.60s
+New best model at epoch 2 with acc 0.9763
+[ResNet] Epoch [3/20] LR=0.001, BS=64 | Train Loss=0.1003, Test Loss=0.0451, Test Acc=0.9869, Time=134.82s
+New best model at epoch 3 with acc 0.9869
+[ResNet] Epoch [4/20] LR=0.001, BS=64 | Train Loss=0.0871, Test Loss=0.0430, Test Acc=0.9864, Time=134.86s
+[ResNet] Epoch [5/20] LR=0.001, BS=64 | Train Loss=0.0850, Test Loss=0.0506, Test Acc=0.9838, Time=134.37s
+[ResNet] Epoch [6/20] LR=0.001, BS=64 | Train Loss=0.0818, Test Loss=0.0520, Test Acc=0.9844, Time=134.24s
+[ResNet] Epoch [7/20] LR=0.001, BS=64 | Train Loss=0.0872, Test Loss=0.0455, Test Acc=0.9871, Time=135.13s
+New best model at epoch 7 with acc 0.9871
+[ResNet] Epoch [8/20] LR=0.001, BS=64 | Train Loss=0.0811, Test Loss=0.0663, Test Acc=0.9811, Time=134.19s
+[ResNet] Epoch [9/20] LR=0.001, BS=64 | Train Loss=0.0750, Test Loss=0.0471, Test Acc=0.9863, Time=134.42s
+[ResNet] Epoch [10/20] LR=0.001, BS=64 | Train Loss=0.0748, Test Loss=0.0449, Test Acc=0.9852, Time=134.60s
+[ResNet] Epoch [11/20] LR=0.001, BS=64 | Train Loss=0.0681, Test Loss=0.0429, Test Acc=0.9876, Time=135.32s
+New best model at epoch 11 with acc 0.9876
+[ResNet] Epoch [12/20] LR=0.001, BS=64 | Train Loss=0.0655, Test Loss=0.0414, Test Acc=0.9892, Time=134.76s
+New best model at epoch 12 with acc 0.9892
+[ResNet] Epoch [13/20] LR=0.001, BS=64 | Train Loss=0.0616, Test Loss=0.0335, Test Acc=0.9893, Time=133.88s
+New best model at epoch 13 with acc 0.9893
+[ResNet] Epoch [14/20] LR=0.001, BS=64 | Train Loss=0.0585, Test Loss=0.0444, Test Acc=0.9877, Time=135.21s
+[ResNet] Epoch [15/20] LR=0.001, BS=64 | Train Loss=0.0571, Test Loss=0.0441, Test Acc=0.9877, Time=135.22s
+[ResNet] Epoch [16/20] LR=0.001, BS=64 | Train Loss=0.0525, Test Loss=0.0435, Test Acc=0.9872, Time=134.40s
+[ResNet] Epoch [17/20] LR=0.001, BS=64 | Train Loss=0.0510, Test Loss=0.0277, Test Acc=0.9914, Time=135.47s
+New best model at epoch 17 with acc 0.9914
+[ResNet] Epoch [18/20] LR=0.001, BS=64 | Train Loss=0.0487, Test Loss=0.0343, Test Acc=0.9890, Time=134.80s
+[ResNet] Epoch [19/20] LR=0.001, BS=64 | Train Loss=0.0515, Test Loss=0.0348, Test Acc=0.9896, Time=135.46s
+[ResNet] Epoch [20/20] LR=0.001, BS=64 | Train Loss=0.0460, Test Loss=0.0300, Test Acc=0.9910, Time=134.76s
+[ResNet] Total training time: 2705.91s, Best Acc=0.9914 at epoch 17

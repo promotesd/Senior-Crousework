@@ -1,0 +1,11 @@
+类别编号	类别名称（英文）	含义说明
+0	airplane	飞机
+1	automobile	汽车
+2	bird	鸟
+3	cat	猫
+4	deer	鹿
+5	dog	狗
+6	frog	青蛙
+7	horse	马
+8	ship	船
+9	truck	卡车（货车）
