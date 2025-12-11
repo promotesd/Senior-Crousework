@@ -93,3 +93,15 @@ For Part A **you do not need to manually download or unpack any dataset**.
 
 
 # Part B
+
+目录结构为：
+Assignment1/
+├── dataset/CrowdHuman/
+│   ├── images/train, images/val
+│   ├── labels/train, labels/val
+│   ├── annotation_train.odgt, annotation_val.odgt
+└── partB/odgt2yolo.py
+
+cd \Assignment1\partB
+python odgt2yolo.py ../dataset/CrowdHuman/annotation_train.odgt
+python odgt2yolo.py --val ../dataset/CrowdHuman/annotation_val.odgt

@@ -1,2 +1,4 @@
 dataset/
 partA/logs/**/model_best.pth
+partB/BasicModel
+yolo11n.pt
