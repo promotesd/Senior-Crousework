@@ -1,0 +1,7 @@
+Evaluation on validation set using YOLO best.pt
+detection_accuracy: 0.749037504649129
+false_positives: 18308
+missed_detections: 24966
+true_positives: 74515
+total_gt: 99481
+total_pred: 92823
