@@ -6,4 +6,3 @@ partB/logs/**/weights/
 partB/logs/**/best_model.pth
 partB/logs/**/val_best/
 partB/logs/**/val_best_vis/
-partB/logs/
