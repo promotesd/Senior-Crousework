@@ -1,7 +1,0 @@
-Evaluation on validation set using best_model.pth
-detection_accuracy: 0.7044360229591581
-false_positives: 15854
-missed_detections: 29403
-true_positives: 70078
-total_gt: 99481
-total_pred: 85932
