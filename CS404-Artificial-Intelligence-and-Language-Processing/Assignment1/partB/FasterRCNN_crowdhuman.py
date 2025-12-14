@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import cv2
 import torchvision
+from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.transforms import functional as F
 
@@ -24,15 +25,14 @@ PARTB_DIR = FILE.parent                 # Assignment1/partB
 LOGS_ROOT = PARTB_DIR / "logs"
 LOGS_ROOT.mkdir(parents=True, exist_ok=True)
 
-torch.multiprocessing.set_sharing_strategy("file_system")
 np.random.seed(42)
 
 def create_fasterrcnn_resnet50_fpn_v2(num_classes: int, pretrained: bool = True) -> torch.nn.Module:
-    """
+    '''
     创建 Faster R-CNN ResNet50 FPN V2 模型，并替换分类头。
 
     num_classes: 包含背景。比如 [background, person] => num_classes = 2
-    """
+    '''
     if pretrained:
         weights = torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
         model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(weights=weights)
@@ -43,14 +43,109 @@ def create_fasterrcnn_resnet50_fpn_v2(num_classes: int, pretrained: bool = True)
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
 
-class CrowdHumanYOLODataset(Dataset):
+class ResizeWithPadding640:
     """
+    等比例缩放到最长边=640，然后对短边 padding 到 640x640。
+    同时对 boxes 做同样的缩放和偏移。
+    """
+    def __init__(self, target_size: int = 640):
+        self.target_size = target_size
+
+    def __call__(self, img: Image.Image, boxes: torch.Tensor):
+        """
+        img: PIL.Image
+        boxes: Tensor [N, 4], (x1, y1, x2, y2) in 原图坐标
+        返回: img_tensor, boxes_tensor
+        """
+        w, h = img.size
+        if w == 0 or h == 0:
+            # 极端情况，直接转 tensor 返回
+            img_t = F.to_tensor(img)
+            return img_t, boxes
+
+        # 等比例缩放
+        scale = self.target_size / max(w, h)
+        new_w, new_h = int(round(w * scale)), int(round(h * scale))
+
+        # 缩放图像
+        img = F.resize(img, (new_h, new_w))  # 注意 (H, W)
+
+        # 缩放 boxes
+        if boxes.numel() > 0:
+            boxes = boxes.clone()
+            boxes[:, [0, 2]] *= new_w / w
+            boxes[:, [1, 3]] *= new_h / h
+
+        # 计算 padding
+        pad_w = self.target_size - new_w
+        pad_h = self.target_size - new_h
+        left = pad_w // 2
+        right = pad_w - left
+        top = pad_h // 2
+        bottom = pad_h - top
+
+        # 图像 padding
+        img = F.pad(img, [left, top, right, bottom], fill=0)
+
+        # boxes 平移
+        if boxes.numel() > 0:
+            boxes[:, [0, 2]] += left
+            boxes[:, [1, 3]] += top
+
+        # 转 tensor + normalize
+        img_t = F.to_tensor(img)
+        img_t = F.normalize(
+            img_t,
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        )
+        return img_t, boxes
+    
+class TrainTransform640:
+    """
+    训练阶段的图像增强:
+    - 轻微颜色扰动
+    - 等比例缩放 + padding 到 640x640
+    """
+    def __init__(self, target_size: int = 640):
+        self.color_jitter = transforms.ColorJitter(
+            brightness=0.2,
+            contrast=0.2,
+            saturation=0.2,
+            hue=0.02,
+        )
+        self.resize_pad = ResizeWithPadding640(target_size=target_size)
+
+    def __call__(self, img: Image.Image, boxes: torch.Tensor):
+        # 颜色增强
+        img = self.color_jitter(img)
+        # 几何变换 + normalize
+        img_t, boxes = self.resize_pad(img, boxes)
+        return img_t, boxes
+    
+
+class ValTransform640:
+    """
+    验证 / 测试阶段:
+    - 只做等比例缩放 + padding + normalize
+    保证和训练输入尺度一致，但不加随机性
+    """
+    def __init__(self, target_size: int = 640):
+        self.resize_pad = ResizeWithPadding640(target_size=target_size)
+
+    def __call__(self, img: Image.Image, boxes: torch.Tensor):
+        img_t, boxes = self.resize_pad(img, boxes)
+        return img_t, boxes
+
+
+class CrowdHumanYOLODataset(Dataset):
+    '''
     从 YOLO 标签读取 CrowdHuman 数据：
     - images_dir: .../images/train 或 .../images/val
     - labels_dir: .../labels/train 或 .../labels/val
     YOLO 一行: class cx cy w h (归一化到 [0,1])
     我们只用 class=0，映射到 Faster R-CNN 的 label=1 (person)
-    """
+    '''
 
     def __init__(self, images_dir: Path, labels_dir: Path, transforms=None):
         self.images_dir = Path(images_dir)
@@ -58,7 +153,6 @@ class CrowdHumanYOLODataset(Dataset):
         self.transforms = transforms
 
         self.image_paths = sorted(self.images_dir.glob("*.jpg"))
-        # 也许有 .png，根据需要加上：
         self.image_paths += sorted(self.images_dir.glob("*.png"))
 
         assert len(self.image_paths) > 0, f"未在 {self.images_dir} 找到图像"
@@ -104,12 +198,44 @@ class CrowdHumanYOLODataset(Dataset):
                         boxes.append([x1, y1, x2, y2])
                         labels.append(1)  # person = 1
 
+        # boxes = torch.as_tensor(boxes, dtype=torch.float32)
+        # labels = torch.as_tensor(labels, dtype=torch.int64)
+
+        # image_id = torch.tensor([idx])
+        # area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]) if len(boxes) > 0 else torch.tensor([])
+        # iscrowd = torch.zeros((len(boxes),), dtype=torch.int64)
+
+        # target = {
+        #     "boxes": boxes,
+        #     "labels": labels,
+        #     "image_id": image_id,
+        #     "area": area,
+        #     "iscrowd": iscrowd,
+        # }
+
+        # if self.transforms is not None:
+        #     img = self.transforms(img)
+
+        # else:
+        #     img = F.to_tensor(img)
+
+        # return img, target, str(img_path)
+
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         labels = torch.as_tensor(labels, dtype=torch.int64)
 
+        if self.transforms is not None:
+            img, boxes = self.transforms(img, boxes)
+        else:
+            img = F.to_tensor(img)
+
         image_id = torch.tensor([idx])
-        area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]) if len(boxes) > 0 else torch.tensor([])
-        iscrowd = torch.zeros((len(boxes),), dtype=torch.int64)
+        if boxes.numel() > 0:
+            area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+        else:
+            area = torch.as_tensor([], dtype=torch.float32)
+
+        iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
 
         target = {
             "boxes": boxes,
@@ -118,12 +244,6 @@ class CrowdHumanYOLODataset(Dataset):
             "area": area,
             "iscrowd": iscrowd,
         }
-
-        if self.transforms is not None:
-            img = self.transforms(img)
-
-        else:
-            img = F.to_tensor(img)
 
         return img, target, str(img_path)
 
@@ -134,11 +254,11 @@ def collate_fn(batch):
 
 
 def box_iou(boxes1: np.ndarray, boxes2: np.ndarray) -> np.ndarray:
-    """
+    '''
     boxes1: [N,4] x1,y1,x2,y2
     boxes2: [M,4]
     return: [N,M] IoU
-    """
+    '''
     if boxes1.size == 0 or boxes2.size == 0:
         return np.zeros((boxes1.shape[0], boxes2.shape[0]), dtype=np.float32)
 
@@ -159,6 +279,81 @@ def box_iou(boxes1: np.ndarray, boxes2: np.ndarray) -> np.ndarray:
     return iou
 
 
+def tensor_to_bgr(img_tensor: torch.Tensor) -> np.ndarray:
+    '''
+    将经过 F.normalize(..., mean, std) 的 3xHxW Tensor 还原成 BGR uint8 图像
+    用于在 640x640 变换后的空间里可视化检测结果
+    '''
+    # [C, H, W] -> [H, W, C]
+    img = img_tensor.detach().cpu().numpy()
+    if img.ndim == 3:
+        img = np.transpose(img, (1, 2, 0))  # HWC
+
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
+    img = img * std + mean  # 反归一化到 [0,1]
+    img = np.clip(img * 255.0, 0, 255).astype(np.uint8)  # [0,255]
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    return img
+
+
+
+def draw_detections_on_array(
+    img: np.ndarray,
+    pred_boxes: np.ndarray,
+    scores: np.ndarray,
+    pred_count: int | None = None,
+    gt_count: int | None = None,
+    score_thresh: float = 0.5,
+) -> np.ndarray:
+    '''
+    在 BGR 图像数组上画预测框 + 人数信息
+    img: BGR uint8, HxWx3
+    '''
+    vis = img.copy()
+    for box, score in zip(pred_boxes, scores):
+        if score < score_thresh:
+            continue
+        x1, y1, x2, y2 = box.astype(int)
+        cv2.rectangle(vis, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(
+            vis,
+            f"person {score:.2f}",
+            (x1, max(0, y1 - 5)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            1,
+            cv2.LINE_AA,
+        )
+
+    # 在左上角写 Pred / GT
+    if (pred_count is not None) or (gt_count is not None):
+        text = ""
+        if pred_count is not None:
+            text += f"Pred: {pred_count}"
+        if gt_count is not None:
+            if text != "":
+                text += "  "
+            text += f"GT: {gt_count}"
+
+        cv2.putText(
+            vis,
+            text,
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1.0,
+            (0, 0, 255),
+            2,
+            cv2.LINE_AA,
+        )
+
+    return vis
+
+
+
+
 def compute_detection_metrics(
     model: torch.nn.Module,
     dataloader: DataLoader,
@@ -168,13 +363,13 @@ def compute_detection_metrics(
     max_vis_images: int = 20,
     vis_dir: Path | None = None,
 ) -> Dict[str, Any]:
-    """
+    '''
     在验证集上计算：
       - detection_accuracy = TP / (TP + FN) = TP / total_gt
       - false_positives = FP
       - missed_detections = FN
 
-    """
+    '''
     model.eval()
     total_gt = 0
     total_pred = 0
@@ -192,7 +387,8 @@ def compute_detection_metrics(
 
             for img_tensor, target, output, path in zip(images, targets, outputs, paths):
                 gt_boxes = target["boxes"].cpu().numpy()  # [G,4]
-                total_gt += len(gt_boxes)
+                gt_count = len(gt_boxes)
+                total_gt += gt_count
 
                 scores = output["scores"].cpu().numpy()
                 labels = output["labels"].cpu().numpy()
@@ -201,8 +397,9 @@ def compute_detection_metrics(
                 mask = (labels == 1) & (scores >= score_thresh)
                 pred_boxes = pred_boxes[mask]
                 scores = scores[mask]
+                pred_count = len(pred_boxes)
 
-                total_pred += len(pred_boxes)
+                total_pred += pred_count
 
                 matched_gt = np.zeros(len(gt_boxes), dtype=bool)
                 if len(pred_boxes) > 0 and len(gt_boxes) > 0:
@@ -219,10 +416,15 @@ def compute_detection_metrics(
                 else:
                     fp += len(pred_boxes)
 
-                # 可视化
                 if vis_dir is not None and vis_count < max_vis_images:
-                    vis_img = draw_detections_on_image(
-                        path, pred_boxes, scores, person_label=1, count=None
+                    vis_img = tensor_to_bgr(img_tensor)  # 640x640, BGR
+                    vis_img = draw_detections_on_array(
+                        vis_img,
+                        pred_boxes,
+                        scores,
+                        pred_count=pred_count,
+                        gt_count=gt_count,
+                        score_thresh=score_thresh,
                     )
                     save_path = vis_dir / Path(path).name
                     cv2.imwrite(str(save_path), vis_img)
@@ -254,10 +456,10 @@ def draw_detections_on_image(
     count: int | None = None,
     score_thresh: float = 0.5,
 ) -> np.ndarray:
-    """
+    '''
     读入图，画出预测框和人数统计。
     返回 BGR numpy 图像
-    """
+    '''
     img = cv2.imread(image_path)
     if img is None:
         raise FileNotFoundError(f"无法读取图像: {image_path}")
@@ -301,14 +503,13 @@ def detect_people_in_image(
     score_thresh: float = 0.5,
     save_path: str | None = None,
 ) -> Tuple[int, np.ndarray]:
-    """
-    单张图片推理：
-      - 输入: 模型、设备、图片路径
-      - 输出: (人数, 画好框的图像 BGR)
-    """
     model.eval()
     img = Image.open(image_path).convert("RGB")
-    img_tensor = F.to_tensor(img).to(device)
+
+    val_transform = ValTransform640(target_size=640)
+    boxes_dummy = torch.zeros((0, 4), dtype=torch.float32)
+    img_tensor, _ = val_transform(img, boxes_dummy)
+    img_tensor = img_tensor.to(device)
 
     with torch.no_grad():
         output = model([img_tensor])[0]
@@ -322,37 +523,57 @@ def detect_people_in_image(
     scores = scores[mask]
     people_count = len(boxes)
 
-    vis_img = draw_detections_on_image(
-        image_path, boxes, scores, person_label=1, count=people_count, score_thresh=score_thresh
+    img_vis = (img_tensor.cpu().numpy().transpose(1, 2, 0) * np.array([0.229,0.224,0.225]) + np.array([0.485,0.456,0.406]))
+    img_vis = np.clip(img_vis * 255, 0, 255).astype(np.uint8)
+    img_vis = cv2.cvtColor(img_vis, cv2.COLOR_RGB2BGR)
+
+    for box, score in zip(boxes, scores):
+        if score < score_thresh:
+            continue
+        x1, y1, x2, y2 = box.astype(int)
+        cv2.rectangle(img_vis, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(img_vis, f"person {score:.2f}",
+                    (x1, max(0, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (0, 255, 0), 1, cv2.LINE_AA)
+
+    cv2.putText(
+        img_vis,
+        f"People: {people_count}",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1.0,
+        (0, 0, 255),
+        2,
+        cv2.LINE_AA,
     )
 
     if save_path is not None:
         save_dir = Path(save_path).parent
         save_dir.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(save_path), vis_img)
+        cv2.imwrite(str(save_path), img_vis)
 
-    return people_count, vis_img
+    return people_count, img_vis
 
 
 def train_fasterrcnn_crowdhuman(
     num_epochs: int = 5,
     batch_size: int = 4,
     lr: float = 0.005,
-    num_workers: int = 4,
+    num_workers: int = 0,
     device: str | torch.device | None = None,
     run_name: str | None = None,
     score_thresh: float = 0.5,
     iou_thresh: float = 0.5,
     weights_path: str | None = None,
 ) -> Tuple[torch.nn.Module, str, Dict[str, Any]]:
-    """
+    '''
     训练 Faster R-CNN 在 CrowdHuman 上，只输出 Detection accuracy 和 FP/FN。
 
     日志目录: partB/logs/<run_name>/
       - train_results.txt: 每个 epoch 的 train_loss, detection_accuracy, FP, FN 等
       - val_vis/epoch_xxx/*.jpg: 每个 epoch 部分验证图片的可视化结果
       - best_model.pth: detection_accuracy 最好的模型
-    """
+    '''
     # 设备
     if device is None:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -373,14 +594,19 @@ def train_fasterrcnn_crowdhuman(
     print(f"Train images: {IMG_ROOT / 'train'}")
     print(f"Val images  : {IMG_ROOT / 'val'}")
 
+    train_transform = TrainTransform640(target_size=640)
+    val_transform = ValTransform640(target_size=640)
+
     # 数据集 & DataLoader
     train_dataset = CrowdHumanYOLODataset(
         images_dir=IMG_ROOT / "train",
         labels_dir=LABEL_ROOT / "train",
+        transforms=train_transform,
     )
     val_dataset = CrowdHumanYOLODataset(
         images_dir=IMG_ROOT / "val",
         labels_dir=LABEL_ROOT / "val",
+        transforms=val_transform,
     )
 
     train_loader = DataLoader(
@@ -474,7 +700,7 @@ def train_fasterrcnn_crowdhuman(
             # 更新进度条：前进 bs 张图片
             epoch_bar.update(bs)
 
-            if (step + 1) % 20 == 0:
+            if (step + 1) % 7500 == 0:
                 tqdm.write(
                     f"[Epoch {epoch+1}/{num_epochs}] "
                     f"Step {step+1}/{len(train_loader)} "
@@ -592,6 +818,7 @@ def evaluate_best_model_on_val(
     val_dataset = CrowdHumanYOLODataset(
         images_dir=IMG_ROOT / "val",
         labels_dir=LABEL_ROOT / "val",
+        transforms=ValTransform640(target_size=640),
     )
     val_loader = DataLoader(
         val_dataset,

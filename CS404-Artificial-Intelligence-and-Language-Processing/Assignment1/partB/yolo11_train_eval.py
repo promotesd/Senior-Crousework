@@ -7,7 +7,7 @@ from yolo_crowdhuman import (
 
 
 if __name__ == "__main__":
-    EPOCHS = 10
+    EPOCHS = 32
     IMG_SIZE = 640
     BATCH_SIZE = 8
 
