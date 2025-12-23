@@ -75,7 +75,7 @@ For Part A **you do not need to manually download or unpack any dataset**.
 
 ---
 
-## 5. How to run
+## 5. How to run code
 ### CIFAR10_train
 Run code blocks in CIFAR10_train.ipynb one by one
 
