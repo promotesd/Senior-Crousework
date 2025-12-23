@@ -13,7 +13,7 @@ For Part A **you do not need to manually download or unpack any dataset**.
 
 ---
 
-## 2. How to run the code
+## 2. start environment
 
 1. Activate the environment (if not already):
 
@@ -27,7 +27,7 @@ For Part A **you do not need to manually download or unpack any dataset**.
    cd Assignment1/partA
    ```
 
-3. In the notebook:
+3. In the PartA:
 
    * **Model definition** is in `model.py` (`VGG.SimpleVGG`, `ResNet`).
    * **Training logic** is in `train.py` (`train_model()`).
