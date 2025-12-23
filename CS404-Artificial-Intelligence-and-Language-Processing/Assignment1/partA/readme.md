@@ -87,7 +87,5 @@ Run code blocks in MNIST_train.ipynb one by one
 
 ## 6. Hyperparameter comparison
 ### CIFAR10_train
-Run code blocks in CIFAR10_train.ipynb one by one
 
 ### MNIST_train
-Run code blocks in MNIST_train.ipynb one by one
