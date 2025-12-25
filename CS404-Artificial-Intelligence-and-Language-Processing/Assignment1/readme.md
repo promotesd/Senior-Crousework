@@ -8,6 +8,7 @@ conda activate assign1
 pip install -r requirement.txt
 ```
 
+You can find project in github[ CS404-Assign1](https://github.com/promotesd/Senior-Crousework/tree/main/CS404-Artificial-Intelligence-and-Language-Processing/Assignment1)
 
 # Part A
 
