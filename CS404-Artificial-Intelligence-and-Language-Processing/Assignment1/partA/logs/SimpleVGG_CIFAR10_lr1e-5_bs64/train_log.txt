@@ -1,0 +1,60 @@
+Experiment: SimpleVGG_CIFAR10_lr1e-5_bs64
+lr=1e-05, batch_size=64, num_epochs=30, weight_decay=0.0001, patience=5, min_delta=1e-05
+
+[VGG] Epoch [1/30] LR=1e-05, BS=64 | Train Loss=1.6823, Test Loss=1.4102, Test Acc=0.4710, Time=48.78s
+New best model at epoch 1 with acc 0.4710
+[VGG] Epoch [2/30] LR=1e-05, BS=64 | Train Loss=1.3273, Test Loss=1.2235, Test Acc=0.5567, Time=53.13s
+New best model at epoch 2 with acc 0.5567
+[VGG] Epoch [3/30] LR=1e-05, BS=64 | Train Loss=1.2100, Test Loss=1.1000, Test Acc=0.6072, Time=50.81s
+New best model at epoch 3 with acc 0.6072
+[VGG] Epoch [4/30] LR=1e-05, BS=64 | Train Loss=1.1334, Test Loss=1.0426, Test Acc=0.6261, Time=53.53s
+New best model at epoch 4 with acc 0.6261
+[VGG] Epoch [5/30] LR=1e-05, BS=64 | Train Loss=1.0790, Test Loss=1.0049, Test Acc=0.6405, Time=54.21s
+New best model at epoch 5 with acc 0.6405
+[VGG] Epoch [6/30] LR=1e-05, BS=64 | Train Loss=1.0304, Test Loss=0.9646, Test Acc=0.6601, Time=55.55s
+New best model at epoch 6 with acc 0.6601
+[VGG] Epoch [7/30] LR=1e-05, BS=64 | Train Loss=0.9978, Test Loss=0.9414, Test Acc=0.6667, Time=53.27s
+New best model at epoch 7 with acc 0.6667
+[VGG] Epoch [8/30] LR=1e-05, BS=64 | Train Loss=0.9653, Test Loss=0.9190, Test Acc=0.6759, Time=53.04s
+New best model at epoch 8 with acc 0.6759
+[VGG] Epoch [9/30] LR=1e-05, BS=64 | Train Loss=0.9360, Test Loss=0.8971, Test Acc=0.6864, Time=54.25s
+New best model at epoch 9 with acc 0.6864
+[VGG] Epoch [10/30] LR=1e-05, BS=64 | Train Loss=0.9122, Test Loss=0.8888, Test Acc=0.6889, Time=53.48s
+New best model at epoch 10 with acc 0.6889
+[VGG] Epoch [11/30] LR=1e-05, BS=64 | Train Loss=0.8899, Test Loss=0.8593, Test Acc=0.6984, Time=54.13s
+New best model at epoch 11 with acc 0.6984
+[VGG] Epoch [12/30] LR=1e-05, BS=64 | Train Loss=0.8664, Test Loss=0.8471, Test Acc=0.7048, Time=53.10s
+New best model at epoch 12 with acc 0.7048
+[VGG] Epoch [13/30] LR=1e-05, BS=64 | Train Loss=0.8474, Test Loss=0.8251, Test Acc=0.7105, Time=58.34s
+New best model at epoch 13 with acc 0.7105
+[VGG] Epoch [14/30] LR=1e-05, BS=64 | Train Loss=0.8323, Test Loss=0.8280, Test Acc=0.7143, Time=56.58s
+New best model at epoch 14 with acc 0.7143
+[VGG] Epoch [15/30] LR=1e-05, BS=64 | Train Loss=0.8092, Test Loss=0.8007, Test Acc=0.7210, Time=53.71s
+New best model at epoch 15 with acc 0.7210
+[VGG] Epoch [16/30] LR=1e-05, BS=64 | Train Loss=0.7959, Test Loss=0.7906, Test Acc=0.7218, Time=53.48s
+New best model at epoch 16 with acc 0.7218
+[VGG] Epoch [17/30] LR=1e-05, BS=64 | Train Loss=0.7743, Test Loss=0.8245, Test Acc=0.7129, Time=53.18s
+[VGG] Epoch [18/30] LR=1e-05, BS=64 | Train Loss=0.7626, Test Loss=0.7712, Test Acc=0.7311, Time=54.44s
+New best model at epoch 18 with acc 0.7311
+[VGG] Epoch [19/30] LR=1e-05, BS=64 | Train Loss=0.7472, Test Loss=0.7616, Test Acc=0.7360, Time=53.73s
+New best model at epoch 19 with acc 0.7360
+[VGG] Epoch [20/30] LR=1e-05, BS=64 | Train Loss=0.7394, Test Loss=0.7581, Test Acc=0.7350, Time=53.61s
+[VGG] Epoch [21/30] LR=1e-05, BS=64 | Train Loss=0.7251, Test Loss=0.7410, Test Acc=0.7411, Time=52.80s
+New best model at epoch 21 with acc 0.7411
+[VGG] Epoch [22/30] LR=1e-05, BS=64 | Train Loss=0.7094, Test Loss=0.7430, Test Acc=0.7427, Time=53.43s
+New best model at epoch 22 with acc 0.7427
+[VGG] Epoch [23/30] LR=1e-05, BS=64 | Train Loss=0.6975, Test Loss=0.7197, Test Acc=0.7490, Time=53.44s
+New best model at epoch 23 with acc 0.7490
+[VGG] Epoch [24/30] LR=1e-05, BS=64 | Train Loss=0.6848, Test Loss=0.7170, Test Acc=0.7492, Time=54.09s
+New best model at epoch 24 with acc 0.7492
+[VGG] Epoch [25/30] LR=1e-05, BS=64 | Train Loss=0.6747, Test Loss=0.7059, Test Acc=0.7564, Time=53.03s
+New best model at epoch 25 with acc 0.7564
+[VGG] Epoch [26/30] LR=1e-05, BS=64 | Train Loss=0.6637, Test Loss=0.6996, Test Acc=0.7547, Time=53.95s
+[VGG] Epoch [27/30] LR=1e-05, BS=64 | Train Loss=0.6559, Test Loss=0.6998, Test Acc=0.7586, Time=54.17s
+New best model at epoch 27 with acc 0.7586
+[VGG] Epoch [28/30] LR=1e-05, BS=64 | Train Loss=0.6442, Test Loss=0.6919, Test Acc=0.7622, Time=54.24s
+New best model at epoch 28 with acc 0.7622
+[VGG] Epoch [29/30] LR=1e-05, BS=64 | Train Loss=0.6369, Test Loss=0.6933, Test Acc=0.7607, Time=53.47s
+[VGG] Epoch [30/30] LR=1e-05, BS=64 | Train Loss=0.6204, Test Loss=0.6776, Test Acc=0.7630, Time=53.14s
+New best model at epoch 30 with acc 0.7630
+[VGG] Total training time: 1627.04s, Best Acc=0.7630 at epoch 30

@@ -169,11 +169,21 @@ This project uses **two complementary detectors** to compare different detection
 * Often more stable in hard cases (occlusion / crowded scenes)
 * Useful baseline for academic-style detection pipelines
 
+| Model      | Epochs | detection_accuracy | false_positives | missed_detections | true_positives |
+|------------|---------|---------------|------------|----------------|---------------|
+| Faster R-CNN  |    8     |       0.704        |     15854      |       29403         |      70078         |
+
+
+
 ### YOLOv11 (One-stage detector)
 
 * Very fast inference speed
 * Strong practical performance and easy deployment
 * Modern YOLO variants perform well on crowd detection with good recall–speed tradeoff
+
+| Model      | Epochs | detection_accuracy | false_positives | missed_detections | true_positives |
+|------------|---------|---------------|------------|----------------|---------------|
+| YOLOv11  |    31     |       0.75        |     18308       |       24966         |      74515         |
 
 ---
 ## 6. How to run 
@@ -182,3 +192,12 @@ After dataset preparation.
 Run code blocks in FasterRCNN_train_eval.ipynb one by one
 ### YOLOv11
 Run code blocks in yolo11_train_eval.ipynb one by one
+
+
+## 7. Result
+### CIFAR10_train
+![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs\fasterrcnn_resnet50_fpn_v2_20251212-172745\single_test\273271,1bd660006ab0ac6a.jpg)
+![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs\fasterrcnn_resnet50_fpn_v2_20251212-172745\single_test\273271,2c582000ec648358.jpg)
+### MNIST_train
+![partB/yolo11s_crowdhuman_20251212-012644](logs\yolo11s_crowdhuman_20251212-012644\single_test\273271,1cc7d000a31f3d60.jpg)
+![partB/yolo11s_crowdhuman_20251212-012644](logs\yolo11s_crowdhuman_20251212-012644\single_test\273271,14f0d00052515611.jpg)
