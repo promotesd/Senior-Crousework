@@ -107,10 +107,10 @@ Run code blocks in MNIST_train.ipynb one by one
 
 ## 7. Result
 ### CIFAR10_train
-![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs\ResNet50_CIFAR10_lr1e-5_bs64\test_results\confusion_matrix.png)
-![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs\ResNet50_CIFAR10_lr1e-5_bs64\test_results\correct_examples.png)
-![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs\ResNet50_CIFAR10_lr1e-5_bs64\test_results\incorrect_examples.png)
+![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs/ResNet50_CIFAR10_lr1e-5_bs64/test_results/confusion_matrix.png)
+![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs/ResNet50_CIFAR10_lr1e-5_bs64/test_results/correct_examples.png)
+![partA/ResNet50_CIFAR10_lr1e-5_bs64](logs/ResNet50_CIFAR10_lr1e-5_bs64/test_results/incorrect_examples.png)
 ### MNIST_train
-![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs\SimpleVGG_MNIST_lr1e-3_bs64\test_results\confusion_matrix.png)
-![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs\SimpleVGG_MNIST_lr1e-3_bs64\test_results\correct_examples.png)
-![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs\SimpleVGG_MNIST_lr1e-3_bs64\test_results\incorrect_examples.png)
+![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs/SimpleVGG_MNIST_lr1e-3_bs64/test_results/confusion_matrix.png)
+![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs/SimpleVGG_MNIST_lr1e-3_bs64/test_results/correct_examples.png)
+![partA/SimpleVGG_MNIST_lr1e-3_bs64](logs/SimpleVGG_MNIST_lr1e-3_bs64/test_results/incorrect_examples.png)

@@ -196,8 +196,8 @@ Run code blocks in yolo11_train_eval.ipynb one by one
 
 ## 7. Result
 ### CIFAR10_train
-![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs\fasterrcnn_resnet50_fpn_v2_20251212-172745\single_test\273271,1bd660006ab0ac6a.jpg)
-![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs\fasterrcnn_resnet50_fpn_v2_20251212-172745\single_test\273271,2c582000ec648358.jpg)
+![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs/fasterrcnn_resnet50_fpn_v2_20251212-172745/single_test/273271,1bd660006ab0ac6a.jpg)
+![partB/fasterrcnn_resnet50_fpn_v2_20251212-172745](logs/fasterrcnn_resnet50_fpn_v2_20251212-172745/single_test/273271,2c582000ec648358.jpg)
 ### MNIST_train
-![partB/yolo11s_crowdhuman_20251212-012644](logs\yolo11s_crowdhuman_20251212-012644\single_test\273271,1cc7d000a31f3d60.jpg)
-![partB/yolo11s_crowdhuman_20251212-012644](logs\yolo11s_crowdhuman_20251212-012644\single_test\273271,14f0d00052515611.jpg)
+![partB/yolo11s_crowdhuman_20251212-012644](logs/yolo11s_crowdhuman_20251212-012644/single_test/273271,1cc7d000a31f3d60.jpg)
+![partB/yolo11s_crowdhuman_20251212-012644](logs/yolo11s_crowdhuman_20251212-012644/single_test/273271,14f0d00052515611.jpg)
