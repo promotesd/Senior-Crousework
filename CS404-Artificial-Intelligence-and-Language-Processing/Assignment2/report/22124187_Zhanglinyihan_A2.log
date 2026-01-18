@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.30)  18 JAN 2026 22:56
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.30)  18 JAN 2026 23:08
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -652,7 +652,7 @@ Package fontspec Info:
 (fontspec)             Could not resolve font "FangSong/I" (it probably
 (fontspec)             doesn't exist).
 
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 30.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 31.
  (d:/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -672,38 +672,39 @@ Package fontspec Info:
 [1
 
 ]
-Overfull \hbox (34.46191pt too wide) in paragraph at lines 65--66
+Overfull \hbox (34.46191pt too wide) in paragraph at lines 66--67
 []\T1/lmr/bx/n/10.53937 Categories\T1/lmr/m/n/10.53937 : e.g., \T1/lmtt/m/n/10.53937 Single-player, Multi-player, Co-op, Family Sharing\T1/lmr/m/n/10.53937 . 
  []
 
 
-Overfull \hbox (14.79616pt too wide) in paragraph at lines 66--67
+Overfull \hbox (14.79616pt too wide) in paragraph at lines 67--68
 []\T1/lmr/bx/n/10.53937 Genres\T1/lmr/m/n/10.53937 : of-fi-cial gen-res such as \T1/lmtt/m/n/10.53937 Action, Adventure, Indie, Simulation\T1/lmr/m/n/10.53937 . 
  []
 
 
 
 [2]
-Overfull \hbox (28.905pt too wide) in paragraph at lines 87--88
+Overfull \hbox (28.905pt too wide) in paragraph at lines 88--89
 []\T1/lmr/bx/n/10.53937 Integers: \T1/lmtt/m/n/10.53937 discount, dlc_count, positive, negative, achievements,
  []
 
 
-Overfull \hbox (28.33304pt too wide) in paragraph at lines 89--90
+Overfull \hbox (28.33304pt too wide) in paragraph at lines 90--91
 []\T1/lmr/bx/n/10.53937 Long text: \T1/lmtt/m/n/10.53937 about_the_game, reviews, notes, screenshots LONGTEXT\T1/lmr/m/n/10.53937 .
  []
 
 
-Overfull \hbox (10.71832pt too wide) in paragraph at lines 90--91
+Overfull \hbox (10.71832pt too wide) in paragraph at lines 91--92
 []\T1/lmr/bx/n/10.53937 Multi-value fields: \T1/lmtt/m/n/10.53937 supported_languages, full_audio_languages,
  []
 
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.53937> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 94.
 
 
 [3]
-Overfull \hbox (1.97705pt too wide) in paragraph at lines 100--101
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.53937> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 95.
+
+Overfull \hbox (1.97705pt too wide) in paragraph at lines 101--102
 []\T1/lmtt/m/n/10.53937 idx_release_date(release_date)\T1/lmr/m/n/10.53937 : speeds up time-range queries and
  []
 
@@ -730,7 +731,7 @@ File: figures/glm_q1_price_trend.png Graphic file (type bmp)
 File: figures/glm_q2_linux_compare.png Graphic file (type bmp)
 <figures/glm_q2_linux_compare.png>
 
-Underfull \hbox (badness 7540) in paragraph at lines 198--198
+Underfull \hbox (badness 7540) in paragraph at lines 199--199
 []\TU/SimSun(0)/m/n/10.53937 图 \T1/lmr/m/n/10.53937 5: []GLM-4.5-Flash: Linux vs non-Linux com-par-i-son us-ing
  []
 
@@ -745,7 +746,7 @@ File: figures/glm_q3_top_publishers.png Graphic file (type bmp)
 File: figures/glm_q4_top_approval.png Graphic file (type bmp)
 <figures/glm_q4_top_approval.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 218--218
+Underfull \hbox (badness 10000) in paragraph at lines 219--219
 []\TU/SimSun(0)/m/n/10.53937 图 \T1/lmr/m/n/10.53937 7: []GLM-4.5-Flash: top approval-rate games us-ing
  []
 
@@ -755,7 +756,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 218--218
 File: figures/glm_q4_top_approval2.png Graphic file (type bmp)
 <figures/glm_q4_top_approval2.png>
 
-Underfull \hbox (badness 10000) in paragraph at lines 225--225
+Underfull \hbox (badness 10000) in paragraph at lines 226--226
 []\TU/SimSun(0)/m/n/10.53937 图 \T1/lmr/m/n/10.53937 8: []GLM-4.5-Flash: top approval-rate games us-ing
  []
 
@@ -767,14 +768,14 @@ File: figures/glm_q5_discount_trend.png Graphic file (type bmp)
 
 
 [12]
-Overfull \hbox (8.91698pt too wide) in paragraph at lines 240--241
+Overfull \hbox (8.91698pt too wide) in paragraph at lines 241--242
 \T1/lmr/m/n/10.53937 voked the cor-rect MCP tools for each ques-tion and pro-duced an-swers grounded
  []
 
 File: figures/qwen_q1_price_trend.png Graphic file (type bmp)
 <figures/qwen_q1_price_trend.png>
 
-Overfull \hbox (690.0pt too wide) in paragraph at lines 249--250
+Overfull \hbox (690.0pt too wide) in paragraph at lines 250--251
  [][] 
  []
 
@@ -784,12 +785,12 @@ Overfull \hbox (690.0pt too wide) in paragraph at lines 249--250
 File: figures/qwen_q2_linux_compare.png Graphic file (type bmp)
 <figures/qwen_q2_linux_compare.png>
 
-Overfull \hbox (172.5pt too wide) in paragraph at lines 259--260
+Overfull \hbox (172.5pt too wide) in paragraph at lines 260--261
  [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 260--260
+Underfull \hbox (badness 10000) in paragraph at lines 261--261
 []\TU/SimSun(0)/m/n/10.53937 图 \T1/lmr/m/n/10.53937 11: []Qwen3-8B: Linux vs non-Linux com-par-i-son us-ing
  []
 
@@ -799,14 +800,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 260--260
 File: figures/qwen_q3_top_publishers.png Graphic file (type bmp)
 <figures/qwen_q3_top_publishers.png>
 
-Overfull \hbox (172.5pt too wide) in paragraph at lines 269--270
+Overfull \hbox (172.5pt too wide) in paragraph at lines 270--271
  [][] 
  []
 
 File: figures/qwen_q3_top_publisher2.png Graphic file (type bmp)
 <figures/qwen_q3_top_publisher2.png>
 
-Overfull \hbox (758.99895pt too wide) in paragraph at lines 275--276
+Overfull \hbox (758.99895pt too wide) in paragraph at lines 276--277
  [][] 
  []
 
@@ -828,7 +829,7 @@ File: figures/qwen_q4_top_approval2.png Graphic file (type bmp)
 File: figures/qwen_q4_top_approval3.png Graphic file (type bmp)
 <figures/qwen_q4_top_approval3.png>
 
-Overfull \hbox (345.0pt too wide) in paragraph at lines 297--298
+Overfull \hbox (345.0pt too wide) in paragraph at lines 298--299
  [][] 
  []
 
@@ -842,17 +843,17 @@ File: figures/qwen_q5_discount_trend.png Graphic file (type bmp)
 
 
 [20]
-Overfull \hbox (11.16783pt too wide) in paragraph at lines 322--323
+Overfull \hbox (11.16783pt too wide) in paragraph at lines 323--324
 []\T1/lmr/bx/n/10.53937 Data qual-ity and pre-pro-cess-ing lessons. \T1/lmr/m/n/10.53937 Real-world scraped datasets
  []
 
 
-Overfull \hbox (0.3502pt too wide) in paragraph at lines 324--325
+Overfull \hbox (0.3502pt too wide) in paragraph at lines 325--326
 []\T1/lmr/bx/n/10.53937 Tool de-sign lessons. \T1/lmr/m/n/10.53937 Tools should be de-signed around sta-ble, reusable
  []
 
 
-Overfull \hbox (21.03065pt too wide) in paragraph at lines 324--325
+Overfull \hbox (21.03065pt too wide) in paragraph at lines 325--326
 \T1/lmr/m/n/10.53937 (\T1/lmtt/m/n/10.53937 search_game\T1/lmr/m/n/10.53937 ) as the en-try point, \T1/lmr/m/it/10.53937 (2) \T1/lmr/m/n/10.53937 a primary-key tool (\T1/lmtt/m/n/10.53937 get_game_by_app_id\T1/lmr/m/n/10.53937 )
  []
 
@@ -879,6 +880,6 @@ Here is how much of TeX's memory you used:
  42061 multiletter control sequences out of 15000+600000
  584251 words of font info for 68 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 93i,5n,111p,822b,447s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 93i,5n,111p,822b,467s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on 22124187_Zhanglinyihan_A2.pdf (22 pages).
