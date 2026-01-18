@@ -1,0 +1,332 @@
+% !TEX root = D:\Senior-Crousework\CS404-Artificial-Intelligence-and-Language-Processing\Assignment2\report\22124187_ZhangLinyihan_A2.tex
+
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools,wallpaper}
+\usepackage{t1enc}
+\usepackage{pagecolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{float}
+\usepackage{numerica}
+
+\title{Asignment2 Report}
+\author{22124187 ZhangLinyihan}
+
+\pagestyle{plain}
+\begin{document}
+
+\section*{Assignment2 Report}
+
+\section{Database design and preprocessing}
+\subsection{Data Processing}
+
+To ensure data consistency and enable reliable SQL querying, I performed a unified preprocessing pipeline for the raw Steam dataset. The main goals are: (1) normalize types (date/numeric/boolean/URL), (2) convert invalid placeholders to NULL, and (3) remove unreliable columns.
+
+\paragraph{(1) Date normalization}
+The \texttt{release\_date} values appear in the format \texttt{YYYY/MM/DD} (e.g., \texttt{2024/10/29}). Although MySQL can often parse such strings implicitly, we normalize them to the standard ISO format \texttt{YYYY-MM-DD} and store them as \texttt{DATE}.
+\paragraph{(2) Range and placeholder handling}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Estimated owners}: The placeholder \texttt{0-0} (including variants such as \texttt{0 -- 0}, \texttt{0–0}, \texttt{0—0}) is invalid for owners, so it is converted to \texttt{NULL}.
+  \item \textbf{Metacritic score}: If the value is \texttt{0}, it is treated as missing and converted to \texttt{NULL}.
+  \item \textbf{Achievements} and \textbf{Recommendations}: if the value is \texttt{0}, it is converted to \texttt{NULL} because zeros for this 2 attributions indicate error entries.
+\end{itemize}
+
+\paragraph{(3) Unreliable column removal}
+Several columns are removed due to obvious inconsistency and lack of useful signal:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Peak CCU}: removed (observed to be incorrect for multiple games).
+  \item \textbf{User score}: removed (all values are 0).
+  \item \textbf{Score rank}: removed (entirely empty).
+  \item \textbf{Average/Median playtime}: removed (high missing rate and many zeros, likely incomplete).
+  \item \textbf{Movies}: removed (no valid values).
+\end{itemize}
+
+\paragraph{(4) Type casting and cleaning rules}
+I cast each field into an appropriate database type and apply basic cleaning:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Required age}: if an explicit value exists, keep it. Otherwise, infer from \texttt{notes}: contents with adult/violence/gore imply age 17; romance-related games use age 10; and the minimum is clamped to 3.
+  \item \textbf{Price}: numeric float in USD.
+  \item \textbf{Discount}: numeric percentage rate.
+  \item \textbf{DLC count}: integer.
+  \item \textbf{Text fields}: \texttt{about\_the\_game}, \texttt{reviews}, \texttt{notes}.
+  \item \textbf{List-like fields}: \texttt{supported\_languages} and \texttt{full\_audio\_languages} are stored as comma-separated strings (string lists).
+  \item \textbf{URL/email fields}: \texttt{header\_image}, \texttt{website}, \texttt{support\_url} are stored as URL strings; \texttt{support\_email} is validated as an email-like string when present.
+  \item \textbf{Platform support}: \texttt{windows}/\texttt{mac}/\texttt{linux} are converted to boolean values (True/False) and stored as \texttt{TINYINT(1)} in MySQL.
+  \item \textbf{Review counters}: \texttt{positive} and \texttt{negative} are stored as integers.
+\end{itemize}
+
+\paragraph{(5) Multi-value metadata}
+For better filtering and tag-based analysis, we keep the following multi-value columns as comma-separated strings:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Categories}: e.g., \texttt{Single-player, Multi-player, Co-op, Family Sharing}.
+  \item \textbf{Genres}: official genres such as \texttt{Action, Adventure, Indie, Simulation}.
+  \item \textbf{Tags}: user-facing tags related to gameplay and target audience.
+  \item \textbf{Screenshots}: stored as a comma-separated list of URLs.
+\end{itemize}
+
+\subsection{MySQL Dataset Construction}
+
+I designed a MySQL schema, and imported the processed data into MySQL.
+
+\subsubsection{Entities and Schema Choice}
+
+I adopted a \textbf{single-table schema} rather than multiple relationship tables. The reason is that a single-table design avoids complex joins, reduces query failure risk, and makes tool outputs more stable and reproducible.
+
+\subsubsection{Primary Key Design}
+I use \texttt{app\_id} as the \textbf{PRIMARY KEY}. Steam AppID uniquely identifies a game globally, which makes it the most appropriate key for deduplication and exact lookups. 
+
+\subsubsection{Data Types and Field Justification}
+
+\begin{itemize}
+\item \textbf{Dates:} \texttt{release\_date DATE}. This supports range filtering and time-based aggregation (e.g., grouping by year). During preprocessing, dates were normalized into \texttt{YYYY-MM-DD} so MySQL can parse them reliably.
+\item \textbf{Prices:} \texttt{price DECIMAL(10,2)}. Price uses \texttt{DECIMAL}.
+\item \textbf{Integers:} \texttt{discount, dlc\_count, positive, negative, achievements, recommendations} are stored as \texttt{INT}. 
+\item \textbf{Platform flags:} \texttt{support\_window, support\_mac, support\_linux TINYINT(1)}. Platform availability is stored as 0/1 for efficient filtering and grouping (e.g., Linux vs non-Linux comparison).
+\item \textbf{Long text:} \texttt{about\_the\_game, reviews, notes, screenshots LONGTEXT}. These fields may contain large text blocks or long URL lists.
+\item \textbf{Multi-value fields:} \texttt{supported\_languages, full\_audio\_languages, categories, genres, tags TEXT}. These are stored as text to keep the schema simple and robust for analysis-focused tool queries.
+\item \textbf{URLs and Email:} URLs are stored as \texttt{TEXT} since their length is variable; email is stored as \texttt{VARCHAR}.
+\end{itemize}
+
+The entire database uses \textbf{\texttt{utf8mb4}} to correctly preserve multilingual content (e.g., Chinese/Korean publisher names) and prevent non-ASCII characters.
+
+\subsubsection{Indexing Strategy}
+To support efficient MCP tool queries, I added the following indexes:
+
+\begin{itemize}
+\item \texttt{idx\_release\_date(release\_date)}: speeds up time-range queries and yearly aggregations.
+\item \texttt{idx\_price(price)}: speeds up price filtering and price-related analysis.
+\item \texttt{idx\_linux(support\_linux)}: speeds up platform comparisons and filtering.
+\item \texttt{idx\_publishers(publishers(50))}: supports publisher-level grouping.
+\item \texttt{idx\_required\_age(required\_age)}: supports age-based filtering and comparisons.
+\end{itemize}
+
+
+\section{MCP Server and Tool Design}
+
+To enable tool-based interaction with the Steam games dataset, I implemented a MCP server using \texttt{FastMCP}.
+
+\subsection{Server Architecture}
+
+\textbf{Backend connectivity.} The server loads MySQL configuration from a local \texttt{.env} file and creates a database connection for each tool call. 
+
+\textbf{Query execution.} I implemented two utility functions: \texttt{fetch\_all} executes parameterized SQL statements and returns a list of dictionaries; \texttt{fetch\_one} returns the first row (or \texttt{None}).
+
+\textbf{Tool interface.} Each tool is defined as a Python function decorated with \texttt{@mcp.tool}. The server is started by calling \texttt{mcp.run()} in the \texttt{\_\_main\_\_} block, so the MCP client can launch it via STDIO and discover tools automatically.
+
+\subsection{Tool Set Overview and Design Rationale}
+
+\textbf{search\_game (filtering and retrieval).}
+This tool is used to retrieve a candidate set of games by applying common filters (e.g., keyword search on game name, publisher/developer substring match, platform flags, price range). 
+
+\textbf{get\_game\_by\_app\_id (primary-key).}
+This tool performs an exact lookup by \texttt{app\_id}.
+
+\textbf{top\_games\_by\_approval (quality ranking by approval rate).}
+This tool computes an approval-rate metric from \texttt{positive} and \texttt{negative} reviews and returns games with the highest approval rates. This tool is used to provide a statistically meaningful ranking than raw positive counts.
+
+\textbf{yearly\_summary}
+This tool aggregates the dataset by release year and outputs summary statistics such as the number of games released, average price, average discount, and average DLC count. The tool is designed for trend analysis.
+
+\textbf{compare\_linux\_vs\_nonlinux}
+This tool compares Linux-supported and non-Linux games by grouping on \texttt{support\_linux} and computing aggregate statistics, including average approval rate and sample size.
+
+\textbf{top\_publishers}
+This tool aggregates games by \texttt{publishers} and ranks publishers by average approval rate. It supports publisher quality analysis.
+
+
+\section{Client Configuration}
+
+I used \textbf{Cherry Studio} as the client application. In Cherry Studio, I configured two different LLMs, \textbf{GLM-4.5-Flash} and \textbf{Qwen3-8B}, and connected them to local MCP server.
+
+\subsection{Cherry Studio MCP Server Setup}
+I added a new MCP server entry in Cherry Studio and configured it to launch my \texttt{server.py} locally.
+\begin{figure}[H]
+\centering
+% TODO: replace with your actual image file name
+\includegraphics[width=0.92\linewidth]{figures/cherry_mcp_config.png}
+\caption{Cherry Studio MCP server configuration}
+\label{fig:cherry-mcp-config}
+\end{figure}
+
+\subsection{Two-Model Validation of Tool Calls}
+To verify that tool calling works across different models, I ran the same style of database queries:
+\begin{itemize}
+\item \textbf{Model A:} GLM-4.5-Flash
+\item \textbf{Model B:} Qwen3-8B
+\end{itemize}
+
+For each model, I sent prompts that require accessing MySQL through MCP tools
+\begin{figure}[H]
+\centering
+% TODO: replace with your actual image file name
+\includegraphics[width=0.92\linewidth]{figures/glm_tool_call.png}
+\caption{Tool-call execution in Cherry Studio using GLM-4.5-Flash}
+\label{fig:glm-tool-call}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+% TODO: replace with your actual image file name
+\includegraphics[width=0.92\linewidth]{figures/qwen_tool_call.png}
+\caption{Tool-call execution in Cherry Studio using Qwen3-8B}
+\label{fig:qwen-tool-call}
+\end{figure}
+
+\section{Conversation Screenshots and Evaluation}
+
+\subsection{Model A: GLM-4.5-Flash}
+
+\paragraph{Q1}
+analyze how the average price of Steam games changes over time and whether newer games are generally more expensive
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q1_price_trend.png}
+\caption{GLM-4.5-Flash: price trend analysis using \texttt{yearly\_summary}.}
+\label{fig:glm-q1}
+\end{figure}
+
+\paragraph{Q2}
+whether games that support Linux have different user approval compared to games that do not support Linux.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q2_linux_compare.png}
+\caption{GLM-4.5-Flash: Linux vs non-Linux comparison using \texttt{compare\_linux\_vs\_nonlinux}.}
+\label{fig:glm-q2}
+\end{figure}
+
+\paragraph{Q3}
+which publishers have games with higher-than-average user satisfaction?
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q3_top_publishers.png}
+\caption{GLM-4.5-Flash: publisher ranking using \texttt{top\_publishers}.}
+\label{fig:glm-q3}
+\end{figure}
+
+\paragraph{Q4}
+list the best-reviewed games measured by approval rate
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q4_top_approval.png}
+\caption{GLM-4.5-Flash: top approval-rate games using \texttt{top\_games\_by\_approval}.}
+\label{fig:glm-q4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q4_top_approval2.png}
+\caption{GLM-4.5-Flash: top approval-rate games using \texttt{top\_games\_by\_approval}.}
+\label{fig:glm-q4}
+\end{figure}
+
+\paragraph{Q5}
+whether large discounts are more common in older games, or whether newer games also receive significant discounts.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/glm_q5_discount_trend.png}
+\caption{GLM-4.5-Flash: discount trend analysis using \texttt{yearly\_summary}, \texttt{search\_game}, \texttt{top\_games\_by\_approval}}
+\label{fig:glm-q5}
+\end{figure}
+
+\paragraph{Evaluation (GLM-4.5-Flash).}
+Overall, GLM-4.5-Flash consistently invoked the correct MCP tools for each question and produced answers grounded in the returned SQL results. In the trend questions (price/discount by year), it used \texttt{yearly\_summary} appropriately and summarized the aggregates without inventing extra fields. In the comparison task (Linux vs non-Linux), it used \texttt{compare\_linux\_vs\_nonlinux} and reported differences using the same metric definition (approval rate based on \texttt{positive} and \texttt{negative}). For ranking tasks, it selected \texttt{top\_games\_by\_approval} or \texttt{top\_publishers} and kept the explanation aligned with the tool output. The main strength of GLM-4.5-Flash is \textbf{stable tool routing} and \textbf{concise summarization}.
+
+\subsection{Model B: Qwen3-8B}
+
+\paragraph{Q1}
+analyze how the average price of Steam games changes over time and whether newer games are generally more expensive
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3.00\linewidth]{figures/qwen_q1_price_trend.png}
+\caption{Qwen3-8B: price trend analysis using \texttt{yearly\_summary}.}
+\label{fig:qwen-q1}
+\end{figure}
+
+\paragraph{Q2}
+whether games that support Linux have different user approval compared to games that do not support Linux.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.50\linewidth]{figures/qwen_q2_linux_compare.png}
+\caption{Qwen3-8B: Linux vs non-Linux comparison using \texttt{compare\_linux\_vs\_nonlinux}.}
+\label{fig:qwen-q2}
+\end{figure}
+
+\paragraph{Q3}
+which publishers have games with higher-than-average user satisfaction?
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.50\linewidth]{figures/qwen_q3_top_publishers.png}
+\caption{Qwen3-8B: publisher ranking using \texttt{top\_publishers}.}
+\label{fig:qwen-q3}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=3.20\linewidth]{figures/qwen_q3_top_publisher2.png}
+\caption{Qwen3-8B: publisher ranking using \texttt{top\_publishers}.}
+\label{fig:qwen-q3}
+\end{figure}
+
+\paragraph{Q4}
+list the best-reviewed games measured by approval rate
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.00\linewidth]{figures/qwen_q4_top_approval.png}
+\caption{Qwen3-8B: top approval-rate games using \texttt{top\_games\_by\_approval}.}
+\label{fig:qwen-q4}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{figures/qwen_q4_top_approval2.png}
+\caption{Qwen3-8B: top approval-rate games using \texttt{top\_games\_by\_approval}.}
+\label{fig:qwen-q4}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=2.00\linewidth]{figures/qwen_q4_top_approval3.png}
+\caption{Qwen3-8B: top approval-rate games using \texttt{top\_games\_by\_approval}.}
+\label{fig:qwen-q4}
+\end{figure}
+
+\paragraph{Q5}
+whether large discounts are more common in older games, or whether newer games also receive significant discounts.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/qwen_q5_discount_trend.png}
+\caption{Qwen3-8B: discount trend analysis using \texttt{search\_game}.}
+\label{fig:qwen-q5}
+\end{figure}
+
+\paragraph{Evaluation (Qwen3-8B).}
+Qwen3-8B was able to use MCP tools and provide database-grounded answers, but compared to GLM-4.5-Flash it was \textbf{more verbose} and occasionally less consistent in tool usage. In most queries (yearly trend, Linux comparison, publisher ranking, approval-rate ranking), it successfully invoked the intended tools and explained results based on returned aggregates. When the tool call succeeded, the answers remained faithful to the data and included reasonable interpretations. However, Qwen3-8B showed slightly weaker robustness if the database is lack of relative data, the Qwen3-8B is broken down.
+
+
+\section{Reflections and Conclusions}
+This assignment demonstrates a complete pipeline from raw dataset preparation to an MCP-enabled analytical interface.
+
+\textbf{Database design trade-offs.} I used a single-table schema to maximize query robustness under LLM tool calling. This avoided complex joins and reduced the probability of generating incorrect SQL. The trade-off is reduced normalization for multi-value fields, but is acceptable for this assignment’s filtering and aggregation goals.
+
+\textbf{Data quality and preprocessing lessons.} Real-world scraped datasets often contain missing values, placeholder values (e.g., \texttt{0-0}), and inconsistent types. The most important step was enforcing consistent parsing rules (DATE/DECIMAL/INT/boolean flags) and ensuring missing values are stored as \texttt{NULL}. I also learned that multilingual text requires end-to-end encoding consistency: \texttt{utf8mb4} must be set at the database, connection, and query levels to prevent non-ASCII characters from becoming \texttt{?}.
+
+\textbf{Tool design lessons.} Tools should be designed around stable, reusable query patterns. I found it helpful to provide \textit{(1)} a general filtering tool (\texttt{search\_game}) as the entry point, \textit{(2)} a primary-key tool (\texttt{get\_game\_by\_app\_id}) for verification, and \textit{(3)} a small set of focused aggregation and comparison tools for common analysis tasks.
+
+\textbf{Client integration.} Configuring Cherry Studio to launch the MCP server in a consistent working directory was crucial. Once configured, both GLM-4.5-Flash and Qwen3-8B were able to invoke tools and obtain structured results, validating the MCP pipeline across two different models.
+
+In conclusion, the final system successfully supports database reasoning via MCP: the dataset is structured for efficient querying, the tools expose reliable analysis primitives, and two different LLMs can use those tools to answer non-trivial analytical questions with evidence from MySQL.
+
+
+
+\end{document}

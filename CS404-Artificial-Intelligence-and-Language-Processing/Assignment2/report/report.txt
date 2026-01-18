@@ -1,0 +1,120 @@
+1. 数据处理部分
+
+空值，最大值，最小值，异常值，日期格式，单位，重复值，符号处理，负数
+
+编码问题：必须选择csvutf8编码保存，保存格式为.csv格式
+
+Release date的日期格式：2024/10/29不知道mysql能否识别
+Estimated owners：区间（字符串），游玩人数不可能0 - 0，把0 - 0这一些都改变为空
+Peak CCU：这一列不要了，数据是错误的，后室我自己都玩
+Required age：虽然原始数据如果有保留原始数据，如果没有可以通过notes判断，如果游戏内容含有黄色暴力血腥相关就17，如果恋爱就10，最低不低于3岁
+Price：数字，价格以美元为单位
+Discount（DiscountDLC count）：数字，原本列名称有问题，是当前的一个折扣率，以百分号为单位，但是我觉得可以通过当前的折扣率知道大概每一次活动这个折扣率大概多少
+DLC count:数字，游戏DLC的数量
+About the game：字符，游戏简介
+Supported languages：字符串列表，支持语言，
+Full audio languages：字符串列表，音频语言
+Reviews：字符串，相关评论
+Header image：URL字符串，游戏header image，多模态
+Website：URL字符串，游戏官网 URL。
+Support url：URL字符串，客服/支持页面 URL。
+Support email：邮箱字符串，邮箱格式，支持邮箱。
+Windows：布尔类型，True/False
+Mac：布尔类型，True/False
+Linux：布尔类型，True/False
+Metacritic score：数字，如果为0，设置为空，媒体评分（0–100）。
+Metacritic url：URL字符串，为空就为空，页面链接。
+User score：（不要）用户评分全为0。
+Positive：数字，好评数量。
+Negative：数字，差评数量。
+Score rank：全为空，不要
+Achievements：数字，Steam 成就数量，有些为0，比如后室不可能没有成就，为0，就设置为空。
+Recommendations：数字，推荐数（被推荐次数/推荐相关计数），为0，就设置为空。
+Notes：字符串，备注说明（例如暴力、成人内容等提示）。
+Average playtime forever：历史平均游玩时长（分钟）。数据不完整，而且很多都是0，数据可能误差很大，可以不要
+Average playtime two weeks：近两周平均游玩时长（分钟）。可以不要
+Median playtime forever：历史游玩时长中位数（分钟）。可以不要
+Median playtime two weeks：近两周游玩时长中位数（分钟），中位数就算了，可以不要。
+Developers：字符串，开发商名称。
+Publishers：字符串，发行商名称。
+Categories：使用逗号分隔的字符串，多值，（eg：“Single-player,Multi-player,Co-op,Family Sharing”），游戏几个人玩
+Genres：使用逗号分隔的字符串，多值，官方类型（Action,Adventure,Indie,Simulation）
+Tags：使用逗号分隔的字符串，多值，标签，可能与游玩对象，年龄等相关。
+Screenshots：URL用逗号分隔，游戏截图 URL 列表
+Movies：不要，没有数值删掉
+
+2. 插入数据库，并且论证表结构，键，以及数据类型
+
+B1. 表结构（为什么用一张表）
+
+我们采用单表 games 的分析型结构：每一行代表一款游戏。
+选择单表的原因是：
+
+本作业的核心是让 MCP tools 对数据进行 过滤、聚合、对比（例如按年份统计均价、按平台对比好评率、按发行商统计满意度等）。
+
+使用单表能显著降低 SQL 的 join 复杂度，减少 LLM 生成错误 SQL 的概率，提高工具调用稳定性。
+
+对于 Categories/Genres/Tags 这类多值字段，虽然可以拆成多对多关系表，但会引入额外关联表与 join；在本作业中，我们将其存为逗号分隔字符串，以换取查询的简洁性与鲁棒性（在报告中明确说明这是一个 trade-off）。
+
+B2. 键的选择（为什么 app_id 是主键）
+
+app_id（Steam AppID）对每个游戏全局唯一，因此作为 PRIMARY KEY 最合适。
+
+使用 BIGINT 是为了覆盖 Steam AppID 的数值范围，避免未来数据扩展时溢出。
+
+主键约束也保证导入时不会出现重复游戏记录。
+
+B3. 数据类型选择依据（为什么这样设计）
+
+日期：release_date DATE
+用于按年/月聚合（YEAR(release_date)）和范围过滤，适合趋势分析。CSV 中日期在预处理阶段统一为 YYYY-MM-DD 以保证 MySQL 可解析。
+
+价格：price DECIMAL(10,2)
+金额使用 DECIMAL 避免浮点误差，支持准确的均价/区间统计。
+
+折扣、DLC 数量、计数类指标：discount INT, dlc_count INT, positive/negative/achievements/recommendations INT
+这些为离散数值，INT 足够且便于聚合统计。
+
+布尔平台支持：support_window/support_mac/support_linux TINYINT(1)
+存 0/1，便于过滤和分组统计，并可对 support_linux 建索引以加速平台对比类查询。
+
+长文本与多值字段：about_the_game/notes/screenshots LONGTEXT，categories/genres/tags TEXT
+文本字段用于解释或可选的关键词过滤；多值字段以文本方式存储以减少 join 复杂度，满足本作业分析查询需求。
+
+URL 与邮箱：URL 使用 TEXT（长度不稳定），邮箱使用 VARCHAR(320)（覆盖最大邮箱长度规范）。
+
+字符编码：全库使用 utf8mb4
+数据包含中文/韩文发行商等非 ASCII 字符，utf8mb4 可防止字符被破坏成 ?。
+
+B4. 索引设计（为什么加这些索引）
+
+idx_release_date(release_date)：加速按年份/日期的查询与聚合（趋势类问题）。
+
+idx_price(price)：加速价格过滤/区间统计。
+
+idx_linux(support_linux)：加速平台支持对比（Linux vs 非 Linux）。
+
+idx_publishers(publishers(50))：支持按发行商分组统计（publisher 质量分析）。对 TEXT 使用前缀索引以平衡空间与速度。
+
+3.MCP服务器与工具设计
+
+search_game（过滤检索工具）
+我构建了一个通用的检索工具，用于在数据集中快速筛选符合条件的游戏（例如按游戏名关键词、发行商/开发商文本、发布时间下界、平台支持情况、价格区间、好评数量阈值等）。这个工具的作用是覆盖绝大多数“找一批候选游戏”的需求，并通过分页返回结果，避免一次返回过多数据。设计理由是：过滤是后续所有分析的入口，做成一个通用检索工具能让模型以最少的调用成本获得“可分析的数据子集”，同时分页与固定排序能提升工具调用的稳定性与可解释性。
+
+get_game_by_app_id（主键精确查询工具）
+我实现了按 app_id 精确返回单条记录的工具，用于快速定位某个游戏并查看其完整信息。它主要服务于两类场景：一是调试/核对导入结果（比如检查某条记录字段是否正确），二是在分析中需要对某个具体游戏做“证据引用”或进一步细看。设计理由是：主键查询是数据库里最可靠、最确定的访问方式，能显著降低由于模糊匹配带来的误查，尤其在验证多语言文本（中文/韩文）是否正确存储时非常有用。
+
+top_games_by_approval（好评率排序工具）
+我设计了一个“口碑排序”工具，计算并返回好评率较高的游戏列表（基于 positive 与 negative 形成的比例指标）。该工具用于回答“哪些游戏评价最好”“在某个平台上口碑最好的是哪些”等问题。设计理由是：单纯看好评数会偏向热门游戏，而好评率更能刻画“质量/满意度”；同时我在实现中加入了最小评论量阈值的过滤逻辑，避免评论太少导致的比例失真，从而让结果更可靠。
+
+yearly_summary（按年份聚合统计工具）
+我实现了按 release_date 年份聚合的统计工具，用于输出每年的游戏数量、平均价格、平均折扣、平均 DLC 数等概览指标。它适合做趋势类分析，例如“不同年份上架游戏的价格变化”“折扣水平是否随时间变化”。设计理由是：年份聚合能把高维明细数据压缩为可解释的时间序列，便于后续对比与可视化；同时数据库已有 release_date 索引，能够提高按时间过滤与分组统计的效率。
+
+compare_linux_vs_nonlinux（Linux 支持对比工具）
+我实现了一个对比分析工具，将游戏按是否支持 Linux 分为两组，并比较两组在平均好评率、样本量等统计上的差异。这个工具用于回答“支持 Linux 的游戏是否整体评价更好/更差”这类比较问题。设计理由是：比较类问题需要将数据分组后计算同一指标，再并排输出；直接做成工具能避免每次分析重复写分组 SQL，并且能保证口径一致（同一计算方式、同一过滤策略），让结论更可复现。
+
+top_publishers（发行商聚合排名工具）
+我实现了按发行商聚合的统计与排名工具，输出发行商的游戏数量、平均好评率等指标，用于分析“哪些发行商整体口碑更好”。设计理由是：发行商是常见的质量分析维度；为了降低小样本偏差，我在逻辑上使用最少游戏数与最少评论量等过滤策略。由于本作业采用单表结构且 publishers 为文本字段（可能存在多值），该工具按“字段整体文本”进行聚合统计，以换取查询简洁和工具稳定性。
+
+4. 客户端配置
+

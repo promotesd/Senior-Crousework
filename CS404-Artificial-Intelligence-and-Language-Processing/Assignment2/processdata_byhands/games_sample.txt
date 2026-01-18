@@ -1,0 +1,77 @@
+1. 数据处理部分
+
+空值，最大值，最小值，异常值，日期格式，单位，重复值，符号处理，负数
+
+编码问题：选择csvutf8编码保存，保存格式为.csv格式
+
+Release date的日期格式：2024/10/29不知道mysql能否识别
+Estimated owners：区间（字符串），游玩人数不可能0 - 0，把0 - 0这一些都改变为空
+Peak CCU：这一列不要了，数据是错误的，后室我自己都玩
+Required age：虽然原始数据如果有保留原始数据，如果没有可以通过notes判断，如果游戏内容含有黄色暴力血腥相关就17，如果恋爱就10，最低不低于3岁
+Price：数字，价格以美元为单位
+Discount（DiscountDLC count）：数字，原本列名称有问题，是当前的一个折扣率，以百分号为单位，但是我觉得可以通过当前的折扣率知道大概每一次活动这个折扣率大概多少
+DLC count:数字，游戏DLC的数量
+About the game：字符，游戏简介
+Supported languages：字符串列表，支持语言，
+Full audio languages：字符串列表，音频语言
+Reviews：字符串，相关评论
+Header image：URL字符串，游戏header image，多模态
+Website：URL字符串，游戏官网 URL。
+Support url：URL字符串，客服/支持页面 URL。
+Support email：邮箱字符串，邮箱格式，支持邮箱。
+Windows：布尔类型，True/False
+Mac：布尔类型，True/False
+Linux：布尔类型，True/False
+Metacritic score：数字，如果为0，设置为空，媒体评分（0–100）。
+Metacritic url：URL字符串，为空就为空，页面链接。
+User score：（不要）用户评分全为0。
+Positive：数字，好评数量。
+Negative：数字，差评数量。
+Score rank：全为空，不要
+Achievements：数字，Steam 成就数量，有些为0，比如后室不可能没有成就，为0，就设置为空。
+Recommendations：数字，推荐数（被推荐次数/推荐相关计数），为0，就设置为空。
+Notes：字符串，备注说明（例如暴力、成人内容等提示）。
+Average playtime forever：历史平均游玩时长（分钟）。数据不完整，而且很多都是0，数据可能误差很大，可以不要
+Average playtime two weeks：近两周平均游玩时长（分钟）。可以不要
+Median playtime forever：历史游玩时长中位数（分钟）。可以不要
+Median playtime two weeks：近两周游玩时长中位数（分钟），中位数就算了，可以不要。
+Developers：字符串，开发商名称。
+Publishers：字符串，发行商名称。
+Categories：使用逗号分隔的字符串，多值，（eg：“Single-player,Multi-player,Co-op,Family Sharing”），游戏几个人玩
+Genres：使用逗号分隔的字符串，多值，官方类型（Action,Adventure,Indie,Simulation）
+Tags：使用逗号分隔的字符串，多值，标签，可能与游玩对象，年龄等相关。
+Screenshots：URL用逗号分隔，游戏截图 URL 列表
+Movies：不要，没有数值删掉
+
+2.新的数据列
+
+Release date的日期格式：2024/10/29不知道mysql能否识别
+Estimated owners：区间（字符串），游玩人数不可能0 - 0，把0 - 0这一些都改变为空
+Required age：虽然原始数据如果有保留原始数据，如果没有可以通过Notes和Tags判断，如果游戏内容含有黄色暴力血腥相关就17，如果恋爱就10，最低不低于3岁
+Price：数字，价格以美元为单位
+Discount（DiscountDLC count）：数字，原本列名称有问题，是当前的一个折扣率，以百分号为单位，但是我觉得可以通过当前的折扣率知道大概每一次活动这个折扣率大概多少
+DLC count:数字，游戏DLC的数量
+About the game：字符，游戏简介
+Supported languages：字符串列表，支持语言，
+Full audio languages：字符串列表，音频语言
+Reviews：字符串，相关评论
+Header image：URL字符串，游戏header image，多模态
+Website：URL字符串，游戏官网 URL。
+Support url：URL字符串，客服/支持页面 URL。
+Support email：邮箱字符串，邮箱格式，支持邮箱。
+Windows：布尔类型，True/False
+Mac：布尔类型，True/False
+Linux：布尔类型，True/False
+Metacritic score：数字，如果为0，设置为空，媒体评分（0–100）。
+Metacritic url：URL字符串，为空就为空，页面链接。
+Positive：数字，好评数量。
+Negative：数字，差评数量。
+Achievements：数字，Steam 成就数量，有些为0，比如后室不可能没有成就，为0，就设置为空。
+Recommendations：数字，推荐数（被推荐次数/推荐相关计数），为0，就设置为空。
+Notes：字符串，备注说明（例如暴力、成人内容等提示）。
+Developers：字符串，开发商名称。
+Publishers：字符串，发行商名称。
+Categories：使用逗号分隔的字符串，多值，（eg：“Single-player,Multi-player,Co-op,Family Sharing”），游戏几个人玩
+Genres：使用逗号分隔的字符串，多值，官方类型（Action,Adventure,Indie,Simulation）
+Tags：使用逗号分隔的字符串，多值，标签，可能与游玩对象，年龄等相关。
+Screenshots：URL用逗号分隔，游戏截图 URL 列表
