@@ -1,0 +1,135 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools,wallpaper}
+\usepackage{t1enc}
+\usepackage{pagecolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{float}
+\usepackage{numerica}
+
+
+\begin{document}
+
+\section{Reducibility}
+
+\subsection{Reducibility}
+
+A is reducible to B（A可归约到B）：如果B是可判定的，那么A是可判定的；如果A是不可判定的，那么B是不可判定的。
+
+\begin{itemize}
+    \item Reduce $A_{TM}$ to $HALT_{TM}$将接受问题归约到停机问题
+    
+    已知$A_{TM}$是不可判定的，$A_{TM}$=\{<M,w>|M 是图灵机，并且M接受w\},$HALT_{TM}$=\{<M,w>|M 是图灵机，并且M在输入w上停机\}。
+
+    证明
+    \begin{enumerate}
+        \item 假设$HALT_{TM}$是可判定的，有一个decider R可以判定$HALT_{TM}$，因此我们可以使用R来构造$A_{TM}$的判定器S。
+        \item 思路：对于S，输入为<M,w>，S模拟M的输出，如果M接受w，S输出接受；如果M拒绝w，S输出拒绝；但是我们无法确定M是否在循环。因此我们使用R来判定M是否在w上停机，如果R表示M在w上不停机，则输出拒绝；若R表示M在w上停机，则继续模拟。
+        \item 构造图灵机S=“On input <M,w>, an encoding of a TM M and a string w: 1. 运行 TM R 在输入<M,w> 2. 如果R拒绝，S拒绝 3.如果R接受，S接受并且输出M(w),如果M接受w，S接受，如果M拒绝w，S拒绝。”
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Reductions via computation histories}
+
+定义：M是一个图灵机并且w是图灵机的输入。M在w上的接受计算历史是一个配置序列，$C_1,C_2,...,C_l$,其中$C_1$是M在输入w上的初始配置，$C_l$是M的接受配置，并且每一个$C_i$都根据$C_{i-1}$合法得到。M在w上的拒绝计算历史，就是$C_l$是M的拒绝配置。
+
+计算历史是有限序列，如果M在w上不停机，那么不存在M在w上的计算历史。确定性图灵机有且仅有一个计算历史，非确定性图灵机在单个输入上会有多个计算历史。
+
+\begin{itemize}
+    \item Linear bounded automaton线性有界自动机
+    
+    线性有界自动机是一种受限的图灵机，其带头不允许移出纸带包含的起始输入字符的长度之外。
+
+    $A_{LAB}$=\{<M,w>|M 是一个线性有界状态机，其接受输入w\}
+
+    \item $A_{LAB}$是decidable
+    
+    \begin{enumerate}
+        \item 假设 M是一个具有q个状态以及其字母表中含有g个符号的线性有界自动机，对于长度为n的磁带，M有$qng^n$个不同的configuration，起始输入的字符长度n决定了configurations的数量。
+        \item 思路：线性有界自动机M，输入为w，在判定$A_{LAB}$语言中，如果M停机并且接受，则输出接受；若M停机并拒绝，则输出拒绝；但是我们要检测循环的情况并且判定为拒绝。由于线性有界自动机M的configurations数量是有限的$qng^n$,因此如果执行步数超出$qng^n$，则拒绝，并且由于鸽巢原理，至少存在一种重复的格局。
+        \item L="On input <M,w>, M为线性有界自动机，w为字符串：1.在输入w上模拟M$qng^n$步直至停机。2.如果M停机，接受如果M接受，拒绝如果M拒绝。如果未停机，则拒绝。"
+    \end{enumerate}
+
+\end{itemize}
+
+\subsection{Post Correspondence Problem, PCP(不考)}
+
+\subsection{Mapping Reducibility(映射可归约性)/Many-One Reducibility(多对一可归约性)}
+
+若能通过映射可归约性将问题A归约为问题B，说明存在一个computable function将问题A的实例转换为问题B多实例，若我们有一个被称为归约的转换函数，用问题B的求解器来解决问题A。
+
+\begin{itemize}
+    \item computable functions
+    
+    定义：如果存在图灵机M，对于每一个输入w，M都会停机并且在纸带上仅仅存在f(w)，那么函数f：从字符集子集映射到字符集子集是一个可计算函数。
+
+    \item 映射归约
+    
+    定义：语言A mapping reducible 到语言B，写作$A\leqslant m B$,如果存在一个可计算函数f，对于每个w，存在$w \in A \Leftrightarrow f(w) \in B$.方程f被称为the reduction of A to B.
+
+    \begin{enumerate}
+        \item 如果A是映射可归约到B且B是可判定的，那么A也是可判定的。
+        
+        证明：假设B的判定器M，并且f是A到B归约的可计算函数，我们要设计一个A的判定器N。
+
+        N=“On input w : 1. compute f(w) 2. Run M on input f(w) and output the result of M”
+
+        \item 定理：如果A可以归约到B并且A是不可判定的，那么B是不可判定的。
+        \item 定理：如果A映射可归约到B并且B是图灵可识别的，那么A是图灵可识别的。
+        \item 定理：如果A映射可归约到B并且A是图灵不可识别的，那么B是图灵不可识别的。
+        
+
+    \end{enumerate}
+    
+\end{itemize}
+
+\subsection{Undecidable Problems about Turing machine 图灵机的不可判定问题}
+
+没有算法可以求解的问题被叫做不可判定或者不可解决问题。
+
+\begin{itemize}
+    \item L1,L2是一种语言，L1归约到L2是指一个递归函数$\gamma:\sum^{*}\rightarrow \sum^{*}$,满足$x \in L1$当且仅当$\gamma(x) \in L2$
+\end{itemize}
+
+
+\subsection{可递归语言问题}
+
+\begin{itemize}
+    \item 定理：一个语言是递归的当且仅当它和它的补集是递归可枚举的。
+    \item 定义：图灵机M能够枚举语言L当且仅当对于M的一些固定状态q，L是所有满足能够从初始配置跑到含有w的输出配置的的字符串w的集合。一个语言是图灵可枚举的当且仅当有图灵机可以枚举它。
+    图灵机M通过从空白纸带开始运行来枚举语言L，并会周期性地进入一个特殊状态q（非停机状态）。进入状态q即表示当前M纸带上的字符串是L的一个元素；随后M可能会离开状态q，之后再带着纸带上的另一个L的元素重新进入该状态。需注意，L中的元素可按任意顺序列出，且允许重复。
+    \item 定理：一个语言是递归可枚举的当且仅当它是图灵可枚举的。
+    
+    证明：
+    \begin{enumerate}
+        \item 从递归可枚举推导图灵可枚举，语言L能够被图灵机M进行半判定，我们设计一个图灵机M‘，从空白纸带开始按照字典序系统性地生成所有属于L的字符串，并且模拟原机器M在输入$w_i$上的计算，若模拟后的结果为accept，M‘输出$w_i$。
+        \item 从图灵可枚举推导递归可枚举，
+    \end{enumerate}
+    
+    \item 定义：字典序图灵可枚举语言
+    \item 定理：一个语言室可递归的当且仅当字典序图灵可枚举语言
+
+\end{itemize}
+
+\subsection{Rice's Theorem 莱斯定理}
+
+\begin{itemize}
+    \item 表述1
+    \begin{enumerate}
+        \item 设P是一个图灵机语言的非平凡性质，那么证明确定是否给定图灵机的语言含有性质P地问题是不可判定的。
+
+        \item 非平凡性：P是一些图灵机的描述，但是不是全部。图灵机所识别的语言的一种性质，此性质不是所有递归可枚举语言都满足，也不是所有递归可枚举语言都不满足。若存在至少一个递归可枚举语言满足 P，且至少一个递归可枚举语言不满足 P，则 P 是非平凡性质。
+
+        \item 语言性质：如果两个任意图灵机识别的语言相同L($M_1$)=L($M_2$),$<M_1> \in P$当且仅当$<M_2> \in P$ 
+    \end{enumerate}
+    \item 表述2
+    \begin{enumerate}
+        \item 设 \( C \) 是所有递归可枚举语言类的一个真子集且非空，那么以下问题是不可判定的：给定图灵机 \( M \)，\( L(M) \in C \) 是否成立？
+    \end{enumerate}
+\end{itemize}
+
+\end{document}

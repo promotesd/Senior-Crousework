@@ -1,0 +1,1039 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools,wallpaper}
+\usepackage{t1enc}
+\usepackage{pagecolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{float}
+\usepackage{numerica}
+
+
+\begin{document}
+
+\section{Filter}
+
+\subsection{图像类型}
+
+\subsubsection{binary image二值图像}
+每一个图像像素数值$f(x,y)\in \{0,1\}$
+
+常用于阈值分割，比如：如果x大于等于某一个值，那么这个像素强度被赋值为1；若x小于阈值，赋值为0。（可用于哪些是目标，哪些不是目标）
+
+由于图像不具有加法和乘法性质，不可以进行线性滤波，可以用非线性滤波。
+
+\subsubsection{gray image灰度图像}
+
+每一个图像像素数值$f(x,y)\in [0,255]$,可归一化为[0,1]
+
+\subsubsection{color image彩色图像}
+
+RGB三个灰度图像的叠加，每一个图像像素数值$R，G，B\in [0,255]$,可归一化为[0,1]。
+
+可以逐通道进行滤波。
+
+\subsection{卷积}
+\begin{itemize}
+    \item 定义：
+    
+    Convolution is a linear shift-invariant operator.
+    \begin{enumerate}
+        \item 卷积在数学上不要求图像或卷积核是方阵
+        \item 一个算子是线性的，当且仅当T(f1​+f2​)=T(f1​)+T(f2​)并且T($\alpha$f)=$\alpha$T(f),也就是说复杂的输入可以拆成多个处理核的线性组合。
+        \item 一个算子是具有不变性的，T(f(x-$\bigtriangleup $x,y-$\bigtriangleup$ y))=T(f)(x-$\bigtriangleup$ x,y-$\bigtriangleup $y)。对图像先做平移再做卷积算子操作等价于县对图像先做平移再做卷积。
+    \end{enumerate}
+
+    \item 计算公式：
+    $(f*g)[x,y]=\displaystyle \sum_u \sum_v f(x-u,y-v)*g(u,v)$
+    \begin{enumerate}
+        \item f是图像，g是卷积核
+        \item 做卷积要先将卷积核以其原点反转180度（先上下翻转再左右翻转），然后再平移，对图像等邻域进行加权。
+        \item 若不对卷积进行反转，得到的则是两个矩阵的相关性，而不是卷积性质
+        \item 但是你会发现说如果x=y=0带入，会出现使用了不在图像之内的像素数值，因此计算之前我们要先选择规则。
+    \end{enumerate}
+
+    \item 输出shape公式
+    Output size=$\lfloor \frac{W-K+2P}{S} \rfloor+1$
+    W是图像的width/length，K是卷积核的大小，P是padding填充的大小，S是stride步长
+\end{itemize}
+
+\subsection{输出尺寸的3种形式}
+\subsubsection{full全卷积，S=1}
+只要卷积核与图像有任何重叠就计算。计算之后输出的尺寸大小为：$H_{out}=H_{in}+u-1$,$W_{out}=W_{in}+v-1$
+输出的卷积核尺寸是原始图像尺寸+核尺寸-1.
+
+\subsubsection{same同尺寸卷积，S=1}
+通过对图像做padding填充操作，计算之后输出的尺寸大小为：$H_{out}=H_{in}$,$W_{out}=W_{in}$
+输出的卷积核尺寸是原始图像尺寸.
+
+比如：卷积核大小为3，stride为1，padding为1。
+
+\subsubsection{valid有效卷积，S=1}
+当核落在图像内部的时候做卷积计算$W-K+1$
+
+\subsection{边缘处理方法}
+
+\subsubsection{Clip Filter零填充}
+图像边界之外的像素当作0.
+
+\subsubsection{Wrap around}
+越界坐标按照模运算返回运算后坐标的像素值。图像左右上下首尾相接，适合周期信号。
+$f(x,y)=f(x\%H,y\%W)$
+
+\subsubsection{Copy edge}
+
+f(x,y)=f(clip(x,0,H-1), clip(y,0,W-1))
+clip函数三个参数，x是要计算的位置索引的像素值，如果要计算的位置索引小于0，那么x位置像素强度就按照0位置上的像素强度，若大于H-1，就按照H-1位置上的像素强度。
+
+\subsubsection{Reflect镜像}
+越界部分按照边界做镜像映射。
+如果一个图像索引是从0到4，那么如果我们要使用reflect做填充，那第5列按照第4列对称会使用第三列第数值，
+
+\subsubsection{均值滤波mean filter}
+在均值滤波中，滤波器的中的每一个元素都有相同的数值。在对图像做卷积的过程中，使用邻域内像素的等权平均替换中心像素。
+
+比如，一个3*3的滤波器，其中每一个元素值均为1
+
+\subsubsection{均值滤波mean filter}
+在均值滤波中，滤波器的中的每一个元素都有相同的数值。在对图像做卷积的过程中，使用邻域内像素的等权平均替换中心像素。
+
+比如，一个3*3的滤波器，其中每一个元素值均为1/9。
+
+\begin{itemize}
+    \item 优点
+    \begin{enumerate}
+        \item 线性滤波，平移不变性。
+    \end{enumerate}
+    \item 缺点
+    \begin{enumerate}
+        \item 对离卷积核中心原的像素与卷积核中心近的像素赋予相同的权重
+        \item 对salt-and-pepper噪声（椒盐噪声不友好），会将极值点噪声赋予权重。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Gaussion Filter高斯滤波}
+定义：用一个满足高斯分布形状的核g与图像f做卷积得到的输出f*g。高斯核中元素之和为1.
+
+原理：由于高斯分布元素值由中心元素向周围元素递减。Weight contribution of neighborhood pixels according to their closeness to the center.
+
+公式：$G(x,y) = \frac{1}{2\pi\sigma^2}\exp\!\left(-\frac{x^2 + y^2}{2\sigma^2}\right)$
+
+$\sigma$如果越大，高斯分布核中元素的标准差越大，高斯分布越扁平，能够抑制噪声，但是图像也会越模糊。
+核大小：2*（向上取整（标准差的3倍））+1
+
+
+
+\begin{itemize}
+    \item 高斯核的性质
+    \begin{enumerate}
+        \item 高斯核是可分离的，对于一个二维的高斯核，可以拆成两个一维的高斯核进行计算，将计算量从$O(n^2)$降到O(n)
+    \end{enumerate}
+    \item 高斯噪声
+    
+    噪声在数值上服从高斯分布，整张图到处都有轻微“颗粒感/雪花点”。
+
+    \item 优点
+    \begin{enumerate}
+        \item 线性滤波，平移不变性
+        \item 比均匀滤波更加平滑
+        \item 减少均匀滤波的边缘效应，高斯滤波核中心权重随着距离的增加而减少
+        \item 可分离，计算成本较低
+        \item 对高斯噪声有效
+    \end{enumerate}
+    \item 缺点
+    \begin{enumerate}
+        \item 含有一个超参数：标准差。若标准差较大，会导致图像更加模糊
+        \item 对椒盐噪声去噪效果不如中值滤波。
+    \end{enumerate}
+\end{itemize}
+
+
+\subsubsection{Mediate filter 中值滤波}
+
+定义：对每个像素，取其邻域窗口内所有像素值的中位数作为输出。（非线性输出）
+
+\begin{itemize}
+    \item 什么是椒盐噪声
+    
+    椒盐噪声是图像中少量像素被替换为像素值为0或者255的极端值
+    \item 中值滤波为什么能够去除salt-and-pepper noise？
+    
+    中值滤波对离群点不敏感，少数极端值不会改变排序后的中间位置。
+
+    \item 优点
+    \begin{enumerate}
+        \item 对椒盐噪声非常有效且不易受离群点或者极端点的影响
+        \item 相对均值滤波处理图像边缘不会糊掉
+    \end{enumerate}
+
+    \item 缺点
+    \begin{enumerate}
+        \item 非线性，不能用卷积的线性理论解释
+        \item 需要对邻域的像素点进行排序操作，提升计算复杂性。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Sharping filter 锐化滤波}
+
+定义：锐化滤波能够把模糊或者平滑丢掉的高频细节添加回来。
+
+原理：原图+（原图-均值滤波）=锐化滤波
+
+\begin{itemize}
+
+    \item 优点
+    \begin{enumerate}
+        \item 显著增强边缘细节
+    \end{enumerate}
+
+    \item 缺点
+    \begin{enumerate}
+        \item 出现振铃现象
+        \item 高频噪声也可能被引入
+    \end{enumerate}
+\end{itemize}
+
+
+\section{edge detection边缘检测}
+\subsection{边缘检测的目标，成因，价值}
+\subsubsection{边缘检测的目标}
+
+Identify the sudden intensity changes of pixel in a image.
+
+\subsubsection{边缘的成因}
+\begin{itemize}
+    \item 表面法向突变 surface normal discontinuity
+    \item 图像深度的突变 depth discontinuity
+    \item 图像颜色的突变 color discontinuity
+    \item 光照突变 illumination discontinuity
+\end{itemize}
+
+\subsubsection{检测边缘的价值}
+\begin{itemize}
+    \item 边缘携带了图像中大量的语义信息和形状信息
+    \item 边缘比图像中的像素表示更加稀疏，达到了降维的效果。
+\end{itemize}
+
+\subsection{边缘检测原理}
+
+\subsubsection{partial derivatives}
+\begin{itemize}
+    \item 差分滤波核
+    横向的[-1,1],计算x方向上的像素变化，画出y方向上的边缘
+    垂直的[-1,1],计算y方向上的像素变化，画出x方向上的边缘
+
+    \item 有限差分滤波器
+    \begin{enumerate}
+        \item Roberts算子
+        \begin{enumerate}
+            \item 用最小邻域做对角方向的一阶差分。[[1,0][0,-1]],[[0,1][-1,0]]
+        \end{enumerate}
+        \item Prewitt算子
+        \begin{enumerate}
+            \item [[-1,0,1],[-1,0,1],[-1,0,1]]沿水平方向做差分，沿着竖直方向做加权平均。
+        \end{enumerate}
+        \item Sobel算子
+        \begin{enumerate}
+            \item [[-1,0,1],[-2,0,2],[-1,0,1]]沿水平方向做差分，沿着竖直方向做加权平均，给中心更大权重。
+        \end{enumerate}
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{image gradient图像梯度}
+The gradient of an image points in the direction of greatest intensity increase, and its magnitude corresponds to the strength of the edge. 
+
+图像中某个像素的梯度方向是像素intensity增长最快的方向，梯度magnitude幅值表示边缘强度。
+
+图像梯度向量，x分量是图像对x方向的求导，y分量是图像f对y方向的求导。
+
+那么梯度方向和水平方向的夹角可以用梯度方向的y分量对x分量的值取arctan得到角度。幅值使用两个方向的平方之和开根号。
+
+\subsection{噪声的处理与优化}
+在边缘检测中噪声的处理和优化是指，在不显著破坏图像边缘结构的情况下，抑制噪声对梯度计算或者导数计算的干扰，从而获得更稳定更可靠的边缘结果。
+
+\begin{itemize}
+    \item 为什么导数会放大噪声？
+    
+    对一张图像求梯度，梯度方向指向像素intensity变化最大的方向。噪声是高频信号，求导会放大噪声信息。
+
+    \item 解决方法：先平滑再求导
+    
+    疑问：为什么先平滑再求导可行，平滑不是把高频特征一起平滑了吗？
+
+    但是对于一个噪声来说，噪声的周围肯定是低频信息，增大了噪声的平滑程度。
+    
+    f是图像，g是平滑核（一般为高斯核）
+    $\frac{d}{dx}(f*g)$,
+
+    导数和卷积运算是线性平移不可变的算子，因此为了减少计算量和输入复杂性，先将高斯核进行求导为高斯导数核，接着直接用高斯导数核对原图进行卷积操作。$f*\frac{dg}{dx}$，设置标准差，核大小，以及求导方向。
+
+    \item 高斯偏导核性质
+    \begin{enumerate}
+        \item 高斯偏导核元素值之和为0，允许有负数出现。
+        \item 高对比度有较高的数值。
+    \end{enumerate}
+    
+
+\end{itemize}
+
+\subsection{Canny边缘检测}
+定义：Canny边缘检测是一种多阶段的基于优化准则的一阶梯度边缘检测算法，在存在噪声的情况下获取定位准确、连续、单像素宽的边缘。
+
+\begin{itemize}
+    \item 流程
+    \begin{enumerate}
+        \item 对图像进行高斯平滑，以及梯度计算。因此直接使用高斯导数核。
+        \item 为了得到单像素边缘宽，使用非极大值抑制：
+        \begin{itemize}
+            \item 对于一个像素来说，我们已经使用高斯偏导核计算出每一个像素的梯度，因此对于一个厚边缘，在其法线上有很多像素，在法线上我们先挑选一个像素，对比其梯度方向上前一个像素和后一个方向的梯度大小，哪个梯度更大保留哪个，在厚边保留同一梯度方向上梯度最大的单个像素。
+            \item 但是我们会遇到一个问题，如果前后点不在像素中心而在两个像素之间，我们可以使用线性插值的方法根据离这个点最近的两个像素的梯度计算这个点的梯度值。接下来解决挑选单像素后断边连通的问题。
+        \end{itemize}
+        \item 双阈值检测及边缘连接
+        \begin{itemize}
+            \item 假设两个阈值，高阈值Th，低阈值Tl，非边缘小于Tl。如果我们的梯度大于高阈值，称其为强边缘；在低阈值和高阈值之间，称为弱边缘。使用高阈值为起点，在高阈值连接完后仍有断边，我们使用低阈值连接。
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\section{fit拟合算法}
+
+核心目标：用一个简单、参数化模型把大量低层特征（点，线，角点）组织成更高层、紧凑、可解释的结构。
+
+定义：拟合是使用一个参数化模型表示一系列特征。
+
+\subsection{拟合面临的核心问题}
+
+\begin{itemize}
+    \item 存在噪声
+    \begin{enumerate}
+        \item 问题：
+        \begin{itemize}
+            \item 特征点位置测量有误差
+            \item 即使是正确的点，也不严格共线或共圆
+        \end{itemize}
+        \item 后果：
+        \begin{itemize}
+            \item 不要求模型能够完美通过所有点，只能做近似拟合。
+        \end{itemize}
+        \item 方法：最小二乘法
+    \end{enumerate}
+    \item 离群点outliers或者杂波
+    \begin{enumerate}
+        \item 问题：
+        \begin{itemize}
+            \item 数据中混入大量不属于目标模型的点，比如背景边缘或者其他直线
+        \end{itemize}
+        \item 后果：最小二乘法会被离群点拉偏位置
+        \item 解决方法：鲁棒拟合/RANSAC
+    \end{enumerate}
+    \item 缺失数据
+    \begin{enumerate}
+        \item 问题：真实结构被遮挡，只有一部分点。
+        \item 后果：数据不完整，模型参数不稳定
+    \end{enumerate}
+    \item 多模型共存
+    \begin{enumerate}
+        \item 问题：
+        \begin{itemize}
+            \item 要拟合的模型包括直线，圆等其他模型
+        \end{itemize}
+        \item 拟合哪个模型？
+        \item Hough，多次RANSAC
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Least Square line fitting最小二乘法}
+
+定义：通过最小化模型预测与观测参数之间的平方误差，来估计模型参数。
+
+\begin{itemize}
+    \item 数据点(x1,y1),(x2,y2),...,(xn,yn).假设使用y=mx+b拟合这些数据点。
+    \begin{enumerate}
+        \item 我们要找到(m,b)的值最小化最小二乘目标函数$E=\sum_{i=1}^{n}(y_i-mx_i-b)^2$。
+        \item Y看作是n*1的矩阵，X看作是n*2的矩阵，B看作2*1的矩阵。E=Y-XB的矩阵的值。E这个值我们要让其最小，经过求E对B的二阶导数，发现其二阶导数大于0，因此其为半正定的。一阶导递增。原函数先递减后递增有极小值。因此我们让E求一阶导数等于0。（这里用了 转置乘法，标量的转置等等矩阵定理）
+        \item 求出$2X^TXB=2X^TY$.
+        \item B=$(X^TX)^{-1}X^TY$
+    \end{enumerate}
+    \item 但是由于是使用数据点的y值与直线的y值做减法，所以如果拟合的直线垂直于x轴，就不能使用了，因此通过计算点到直线的距离来避免这个问题。
+\end{itemize}
+
+\subsection{Total Least Square line fitting全最小二乘法}
+
+定义：最小化数据点到模型的正交距离的平方和。
+
+\begin{itemize}
+    \item 数据点(x1,y1),(x2,y2),...,(xn,yn).假设使用ax+by=d($a^2+b^2=1$)拟合这些数据点。
+    \begin{enumerate}
+        \item $E=\sum_{i=1}^{n}(ax_i+by_i-d)^2$是如何推导的呢？
+        \item 假设一定点$P_i=(x_i,y_i),P_0=(x_0,y_0)且P_0在直线上。$点$P_i$到直线的正交向量$P_0P_i=(x_i-x_0,y_i-y_0)$,直线的法向量是直线的系数(a,b),因此其单位法向量是向量$\frac{(a,b)}{\sqrt{a^2+b^2}}$.因此$P_0P_i$在法向量上的投影为$P_0P_i*单位法向量$，因此可以求出正交距离。
+        \item 我们要找到(a,b,d)的值最小化最小二乘目标函数$E=\sum_{i=1}^{n}(ax_i+by_i-d)^2$。
+        \item E对d求导，使函数最小值。d是标量，先前面求和符号将n*d移到等号一边，n除到左边，左边构造a*x的平均值+b*y的平均值。这样把d消去，并且把d回带到E。
+        \item 我们把列向量[a,b]看成一个参数矩阵，另一个矩阵为[[$x_i-\overline{x},y_i-\overline{y}$],...,[$x_n-\overline{x},y_n-\overline{y}$]],我们求误差就是求参数矩阵和点坐标矩阵的模，通过矩阵的性质可以转换为$(UN)^TUN$,求E对N的导数，并且为了求解极小值，我们令其为0.（证明：对称矩阵的转置等于其本身（矩阵乘以矩阵的转置））。
+        \item 计算A=$U^TU$,求A的特征值和特征向量，取最小特征值的特征向量=N，最后归一化。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Robust estimators鲁棒性估计}
+
+目的：鲁棒性估计的目标是存在大量离群点的情况下，仍能可靠地估计模型参数。
+
+函数：$\rho=\frac{\mu^2}{\mu^2+\sigma^2}$.
+
+$\mu^2$是我们计算目标函数的公式的数值作为输入。$\sigma$增大，对离群点的惩罚力度更小，$\sigma$减小，对离群点的惩罚力度增大，但是如果$\sigma$过小，会导致一些本应作为内点的点被当作离群点，其残差被过早饱和，从而对模型拟合贡献不足。
+
+\subsection{RANSAC算法}
+
+目标：RANSAC算法通过随机采样，在大量离群点出现的情况下，寻找支持统一模型的最大一致集。
+
+\begin{itemize}
+    \item 算法流程
+    \begin{enumerate}
+        \item 在所有数据点中随机均匀地选取s个点
+        \item 使用直线拟合这s个点
+        \item 设置距离阈值t，在剩余的点中寻找点到直线距离小于距离阈值t的点的数量
+        \item 设置至少发现的点的数量d，如果找到了点的数量大于d，那么接受这条直线。
+        \item 对以上步骤重复N次
+        \item 选择检测出来inliers内点最多的模型
+        \item 最后用所有确认是inliers的数据上使用(LS/TLS)重新拟合模型
+    \end{enumerate}
+    \item 公式
+    \begin{enumerate}
+        \item $(1-(1-e)^s)^N=1-p$. e 是outlier ratio. s是初始随机选择的数据点数量。N是采样数量。p是指N次采样中，至少有一次没有外点的概率是p.
+        \item $N=\frac{log(1-p)}{(1-(1-e)^s)}$
+    \end{enumerate}
+\end{itemize}
+
+
+\section{Hough Transform（fitting方法）}
+
+目标：在存在噪声、遮挡和多个实例的情况下，从大量局部特征点中检测出一个或多个符合某种参数化模型的几何结构。
+
+\begin{itemize}
+    \item 投票模型核心思想
+    \begin{enumerate}
+        \item 特征点会投票到所有可能兼容的所有模型
+        \item 真实的模型会被大量特征点一致支持。
+        \item 噪声和离群点的投票是分散的，不会形成稳定的峰值。
+    \end{enumerate}
+
+    \item 参数空间表示
+    
+    \begin{enumerate}
+        \item 在图像空间中，一条直线$y=m_0x+b_0$表示在霍夫参数空间中的一个点。
+        \item 在图像空间中，一个点($x_0,y_0$)表示霍夫参数空间的一条直线。
+        \item 在图像空间中，对于穿过两个点的同一条直线，表示霍夫参数空间中存在两条相交的直线，交点为图像空间中直线的参数。
+        \item 问题：
+        \begin{itemize}
+            \item 如果图像空间中的一条线垂直于x轴，那么当x的变化量趋于0的时候，m会趋于无穷。导致unbounded parameter domain。引入极坐标参数空间。
+        \end{itemize}
+    \end{enumerate}
+
+    \item 极坐标参数空间表示（polar representation）
+    
+    定义：在图像空间中一个点($x_0,y_0$)，会映射到一个正弦曲线在($\theta,\rho$)空间。
+
+    公式：
+    \begin{enumerate}
+        \item 固定一个图像点(x,y)
+        \item 遍历所有$\theta$
+        \item 计算：$\rho=xcos\theta+ysin\theta$
+        \item 对所有可能的($\theta,\rho$)投票+1
+    \end{enumerate}
+    
+\end{itemize}
+
+\subsection{Hough Transform}
+
+\begin{itemize}
+    \item 算法流程
+    \begin{enumerate}
+        \item 初始化($\theta,\rho$)二维霍夫参数空间/初始化accumulator类加器为全0
+        \item 对于图像中每一条边缘上的点(x,y)，对于$\theta$从0到180
+        \item $\rho=xcos\theta+ysin\theta$,$H(\theta,\rho)=H(\theta,\rho)+1$
+        \item 发现$H(\theta,\rho)$中$(\theta,\rho)$局部最大值。
+    \end{enumerate}
+
+    \item 噪声的影响
+    \begin{enumerate}
+        \item 由于要识别的模型不完美(比如在直线模型中，点不完美共线)，导致没个点的投票曲线不再在一个投票格子中相交。
+        \item 噪声越大，导致某一个格子里能堆到最高票数少了。
+        \item 均匀的噪声会导致霍夫空间中出现虚假峰值
+        \item 随着噪声数量的增多，投票的最大数量也会增加。
+    \end{enumerate}
+
+    \item 如何减小噪声的影响
+    \begin{enumerate}
+        \item 选择discretization离散化方式
+        
+        每隔多少单位$\theta \text{与} \rho$一个格子。如果选择的格子太大，很多不同的直线参数会被映射到同一个格子。如果选择格子太小，属于同一条直线的点因为噪声投到相邻但不同的格子。
+        \item 对累加器做平滑soft voting
+        
+        对于一条曲线经过的格子bin，给其neighboring bin也加票数。
+
+        \item 去除不相关的特征
+        
+        选择幅值大的边缘点
+
+    \end{enumerate}
+
+    \item modified hough Transform
+    
+    \begin{itemize}
+        \item 为什么传统hough要让$\theta$从0到180度都扫描？
+        
+        图像空间的每一个点，我们不知道它属于霍夫空间的那一条线，因此我们要将$\theta$从0到180度遍历一遍，得到一条线，大大增加了计算成本。
+
+        \item modified hough transform流程
+        \begin{enumerate}
+            \item 对于图像空间中每一个边缘点(x,y):
+            \item 求在此点的梯度方向$\theta$
+            \item $\rho=xcos\theta+ysin\theta$
+            \item $H(\theta,\rho)=H(\theta,\rho)+1$
+            \item end
+        \end{enumerate}
+    \end{itemize}
+
+    \item 圆的 hough Transform
+    
+    \begin{itemize}
+        \item 圆的隐式方程
+        
+        $(x-a)^2+(y-b)^2=r^2$,霍夫参数空间是(a,b,r)三维空间。$a=x-cos\theta,b=y-sin\theta$.
+
+        圆的边缘点在霍夫参数空间中表示一个曲面。圆在霍夫参数空间的投影是一个圆锥面。
+
+        \item 使用梯度方向减小计算量
+        
+        \begin{enumerate}
+            \item 要确定(a,b,r)也就是确定圆的圆心和半径。圆心在边缘点的梯度方向也就是半径方向上，因此每个点只要沿着法线方向投一条线，而不是对以(x,y)为圆心的整周圆进行投票。
+            \item 公式：(a,b)=(x,y)*$r(cos\theta,sin\theta)$
+        \end{enumerate}
+    \end{itemize}
+
+    \item generalized hough Transform广义霍夫变换
+    
+    广义霍夫变换接受随机形状的检测，用查找表代替解析公式。
+
+    目标：给定模版轮廓（比如叶子形状，字母，零件），在新的图像中找到它的位置。
+
+    \begin{itemize}
+        \item 算法流程
+        \begin{enumerate}
+            \item reference point：参考点，最后检测出的目标位置点（一般使用模版的质心，模版的角点，或者是自定义的关键点）。
+            \item 对模版轮廓上的每个边界点，计算其梯度方向。
+            \item 记录从边界点到参考点的位移向量。
+            \item 梯度方向索引到位移向量。
+            \item 在待检测图像里，做边缘检测，得到一堆边缘点，想判断：这些边缘点里是否隐藏着模板形状。
+            \item 对每个边缘点，根据其梯度方向，找到原模版中可能的存在这个模版形状相对于模版中心的位置的模版形状集合。
+            \item 如果模板真的在图像里，且 q 对应模板上的某个边缘点，那么参考点应该在 q+原模版中某个模版形状对应其reference point的位移向量
+        \end{enumerate}
+        \item 缺点
+        \begin{enumerate}
+            \item 图像的平移对这种方法影响不大，但是对尺度和旋转较为敏感。
+            \item 内存消耗大
+            \item 对噪声敏感。
+        \end{enumerate}
+    \end{itemize}
+
+    \item Implicit shape models隐式图像模型
+    
+    \begin{itemize}
+        \item 训练阶段
+        \begin{enumerate}
+            \item 输入带标注的训练图像，检测interest points(Harris,DoG)，每个兴趣点提取周围的patch，算descriptor(SIFT,HOG)，输出特征描述以及其在图像中的位置。
+            \item 对所有训练描述子聚类，输出codebook entries(视觉词)，每一个词一个聚类中心
+            \item 对每一个描述子在聚类空间中找到对应的视觉词，输出每个训练兴趣点在聚类空间中的一个视觉词标签
+            \item 为每个兴趣点，计算其到目标中心的向量，并存进所属于的视觉词列表中。
+        \end{enumerate}
+        \item 测试阶段
+        \begin{enumerate}
+            \item 输入新图像
+            \item 提取兴趣点，计算descriptor，最近邻匹配到某个视觉词，输出视觉词类型，匹配距离，置信度，兴趣点位置
+            \item 对每个兴趣点，查询其匹配的视觉词对应的位移向量集合。对每一个候选位移，预测一个物体中心候选，并且给累加器加权
+            \item 在累加器中找到峰值maxima
+            \item 选定某个峰值后，找出哪些兴趣点给这个峰投票。取兴趣点对应的视觉词中的局部mask。把局部mask按照几何关系放回到图像坐标里，按投票权重累加。
+        \end{enumerate}
+    \end{itemize}
+    
+
+\end{itemize}
+
+
+\section{corner detection 角点检测}
+
+\subsection{什么算是好的特征}
+\begin{itemize}
+    \item Repeatability
+    
+    尽管不同的图像中存在几何和光照的变化，但是可以发现相同的特征。
+    \item Saliency
+    
+    每一个特征都具有独特性。
+    \item Compactness
+    
+    特征点相对于图像像素较少，但是信息量很大
+    \item Locality
+    
+    特征在一张图像中占据较少的部分，抗遮挡和干扰能力强。
+\end{itemize}
+
+\subsection{角点检测}
+
+\begin{itemize}
+    \item 在角点周围的区域，图像梯度有两个或者两个以上主方向。
+    \item 公式
+    \begin{enumerate}
+        \item w(x,y)是窗口权重，通常是高斯卷积核，描述这个窗口中每个像素的重要程度。I(x,y)是原始图像的像素强度。(u,v)是沿横坐标移动u和沿着纵坐标移动v。
+        \item 窗口中像素强度之和移动前和移动后的变化量$E=\displaystyle{\sum_{x,y}w(x,y)[I(x+u,y+v)-I(x,y)]^2}$
+        \item I(x+u,y+v)式子中由于u，v都是很小的分量，因此计算此函数对u的偏导即计算在u方向上每个单位的变换量，v方向同理。因此我们使用泰勒展开近似此函数。由于随着阶数对增大，u数值很小，u超过一次方项可以忽略不计，因此我们保留到一次方项。
+        \item 我们将I(x+u,y+v)回带E，将平方项展开。平方展开可以使用(行向量[u,v][[a,b][c,d]]列向量[u,v])进行矩阵相乘。
+        \item 中间的M矩阵，$M_{11}$表示水平方向上的变化量，$M_{12}$表示x,y变化的相关性，$M_{22}$表示y方向上的变化强度。M描述表示灰度变化在各个方向上的结构。
+        \item 所以我们现在E=行向量[u,v]*M*列向量[u,v]。E是一个二次型且属于半正定，且椭圆的一般式$au^2+bv^2=E$，两边同时除E,a>0,b>0,$ac-b^2>0$,因此最后此图为椭圆。
+        \item 接着我们算二阶矩阵M的特征值和特征向量，两个特征值（沿某个方向能量增长的快慢）。
+        \item 若计算出来特征值两个均趋于0，则平坦；若一个特征值远大于另一个则为边缘；若两个特征值都很大，则为角点。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Harris角点检测}
+在传统的角点中，我们需要设置两个个阈值来判断如果两个特征值均大于较大的阈值，为角点，若都在最小阈值之下则为flat region，剩下的为边缘。但是我们需要根据实际情况尝试阈值，比较繁琐。
+
+在harris交点检测中，使用corner response function角点响应函数
+
+$R=det(M)-\alpha*trace(M)^2=\lambda_1\lambda_2-\alpha(\lambda_1+\lambda_2)^2$,$\alpha$通常为0.04到0.06。
+
+如果R远小于0，那么为边缘；如果R远大于0，则为角点；如果R趋近于0，则为flat region。
+
+\begin{itemize}
+    \item 算法过程
+    \begin{enumerate}
+        \item 在每一个像素上计算高斯偏导
+        \item 在高斯窗口中的每一个像素计算二阶导矩阵M
+        \item 极速啊角点响应函数R，并且对R进行比较
+        \item 使用非极大值抑制找出局部极大值
+    \end{enumerate}
+    
+    \item 图像的不变性与协变性
+    Invariance:图像变换但是角点位置不变。（图像亮度，颜色，光照）
+
+    Covariance:如果我们有一张图像的两个变换，特征会在对应的位置检测出来。（缩放，平移，旋转）
+
+    \item harris的不变性与协变性
+    
+    \begin{enumerate}
+        \item 对于光照的加减来说，不变；但是如果是像素值的几倍，那么特征值会被放大，harris响应值改变。
+        \item 对于平移是协变的，图像平移，角点位置也跟着平移
+        \item 对尺度变化不协变，如果一个corner被放大，那么一整张图都可能是角点。
+    \end{enumerate}
+\end{itemize}
+
+\section{Blob detection斑点检测}
+
+目标：在不同尺度的相同图像中，独立地检测两个相同的区域。(尺度协变性)
+
+\subsection{高斯拉普拉斯算子}
+DoG是derivative of Gaussian(高斯偏导核，一维的高斯偏导核做卷积只要左右翻转，二维的高斯偏导核做卷积需要左右翻转+上下翻转)
+LoG是Laplacian of Gaussian(高斯拉普拉斯算子，高斯核的二阶导，y轴以下变化量是x轴的两倍)
+
+\begin{itemize}
+    \item LoG在斑点上的空间响应形状
+    \begin{enumerate}
+        \item blob的空间响应形状，blob中心是不是空间极值
+        
+        当使用LoG对blob进行检测时，$\sigma$不变，当斑点边缘距离很小时，LoG移动到blob中心，边缘响应更强烈地叠加，导致一个blob的两个边缘响应变为一个边缘响应，形成更干净更集中的极值。
+    \end{enumerate}
+    \item LoG在斑点上的响应强度
+        \begin{enumerate}
+        \item blob的空间响应形状
+        
+        当使用LoG对blob进行检测时，LoG位置不变，随着$\sigma$变大，LoG的宽度变宽，感受野变大，未归一化LoG的响应幅值会减小。
+
+    \end{enumerate}
+    \item LoG是具有圆对称性质的算子
+    
+    \begin{enumerate}
+        \item 公式
+        $\nabla^2_{\mathrm{norm}} g = \sigma^2\left(\frac{\partial^2 g}{\partial x^2} + \frac{\partial^2 g}{\partial y^2}\right)$
+        \begin{itemize}
+            \item 在高斯函数中，导数的幅值会随着$\sigma$的增大而减小。一阶与$\frac{1}{\sigma}$成正比，二阶与$\frac{1}{\sigma^2}$成正比,因此我们乘$\sigma^2$实现尺度归一化。
+            \item 由于高斯函数属于线性平移不变性，因此可以看作是先使用高斯核进行平滑后，再看二阶导，这个点相对四周像素强度是高还是低（从暗到亮->从凹到凸）。
+        \end{itemize}
+
+        \item 拉普拉斯尺度对应半径检测
+        \begin{enumerate}
+            \item 对一个半径为r的理想圆形blob，用不同尺度的$\sigma$去卷积，哪一个$\sigma$会让响应更大
+            \item 公式：
+            $\mathrm{LoG}(x,y)=\left[\frac{x^2+y^2-2\sigma^2}{\sigma^4}\right]\frac{1}{2\pi\sigma^2}\exp\!\left(-\frac{x^2+y^2}{2\sigma^2}\right)$
+            \item 结论：$\sigma=\frac{r}{\sqrt{2}}$的时候，LoG=0，响应最大。LoG=0的时候，可以计算r和$\sigma$的关系
+            \item 当LoG的0交叉环与blob的边缘重合时，blob中心响应最大。LoG就是高斯核的二阶导描述的是凹凸关系，当二阶导数=0，一阶导数是在此点取极值可能先变小后变大或者先变大后变小，从而原函数产生先凹后凸或者先凸后凹，由blob和LoG的重合度来计算，当LoG的0环正好落在住blob的边缘，blob中心响应最高。
+        \end{enumerate}
+        
+        \item blob character scale特征尺度
+        
+        定义：blob的特征尺度是使该blob中心达到拉普拉斯最大响应值的尺度$\sigma$
+        
+
+        \item scale-space blob detector
+        用不同大小（不同 σ）的 尺度归一化 LoG 去卷同一张图。在尺度空间中找到拉普拉斯输出结果取平方的极大值。
+
+        中间尺度卷积输出结果的一个点与上一个尺度卷积下一个尺度卷积，如果中间3*3，那么上下面是3*3，中间要比较除了自身的8个，不仅挑选了最大值，还进行了非极大值抑制。
+
+        很可能会在一个地方有两个圆，因为多层是相邻两层，很有可能上面和下面比较的尺度不一样，所以会有一个大圆包着一个小圆
+    \end{enumerate}
+\end{itemize}
+
+\subsection{优化blob检测算法}
+
+\begin{enumerate}
+    \item 由于计算LoG太慢，需要对每一张图片的每个像素计算高斯核的二阶偏导。
+    \begin{itemize}
+        \item  使用DoG（尺度方向有限差分）近似LoG（尺度归一化的高斯拉普拉斯算子）
+        \item 公式：$G(x,y,k\sigma)-G(x,y,\sigma)\approx (k-1)\,\sigma^2\nabla^2 G$
+        \item $G(x,y,(k\sigma)^2)-G(x,y,k\sigma)\approx (k-1)\,(k\sigma)^2\nabla^2 G$
+
+    \end{itemize}
+
+    \item 计算金字塔结构，可以使用计算过的$\sigma$为核的输出和另一个比$(k\sigma)^2$更小的卷积核进行计算，减少计算成本
+    \begin{itemize}
+        \item 根据高斯函数的性质$G(\sigma_1) * G(\sigma_2) = G\!\left(\sqrt{\sigma_1^2 + \sigma_2^2}\right)$
+        \item 对于金字塔结构，使用尺度为$\sigma$以及$\sqrt{(k\sigma)^2-\sigma^2}$来计算$(k\sigma)^2$卷积出来的结果。
+    \end{itemize}
+
+    \item 对于计算不同octave，我们可以使用前一层的计算结果
+    \begin{itemize}
+        \item 第n层octave对图像进行下采样，为了检测更大的结构，(尺度*$2^n$)，大结构不需要使用高分辨率
+        \item 因此对图像进行$2^n$倍下采样，使用相同的算子计算，而不用扩大算子维度，计算效率变高。在实现上，第 $n$ 个 octave 的输入图像可以由第 $(n-1)$ 个 octave 中的高斯平滑结果下采样得到。
+    \end{itemize}
+
+    \item 在一个Octave尺度区间输出几个尺度(用s表示)。为了满足DOG是连续的尺度空间。
+    \begin{itemize}
+        \item $k=2^{\frac{1}{s}}$
+        \item 高斯层数=s+3；DoG层数：s+2；使用不包括最底层和最顶层的高斯来做极值点检测，因为底层和顶层没办法跟其他两层进行对比。
+        \item 下一层第一个正好是对上一层中间层下采样来的，下采样2倍，方差缩小为原来2倍。下采样用更少的像素来表示已经被充分模糊（平滑）的图像
+    \end{itemize}
+    
+\end{enumerate}
+
+\subsection{invariance and covariance of Laplacian blob response}
+
+\begin{itemize}
+    \item 对于拉普拉斯响应，旋转和缩放满足不变性质，因为对于旋转虽然目标点位置会改变，但是拉普拉斯响应值是不会改变的。缩放会导致$\sigma$的数值发生改变，如果图像缩小s倍，那么$\sigma$会缩小为原来的s倍，那在乘上$(s\sigma)^2$会抵消掉，响应不变。
+    \item 对于拉普拉斯响应，平移满足协变性质
+\end{itemize}
+
+\subsubsection{视角变化鲁棒性affine}
+
+\begin{itemize}
+    \item 算法：
+    \begin{enumerate}
+        \item 对于检测出来的blob斑点圆，使用harris角点中M矩阵的特性，M矩阵反映了图像中梯度的变化信息。
+        \item 使用M计算检测出来斑点圆的变化信息，计算两个半轴的数值，如果说有一个两个轴数值相差很大，那么就要沿着短轴的方向收缩blob检测出来的圆，直到两个轴的数值很大且相近为止。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{角度旋转不匹配}
+为了确定两个图像在旋转角度上匹配的，
+
+\begin{itemize}
+    \item 算法流程
+    \begin{enumerate}
+        \item 对于检测的图像patch(SIFT区域)，首先计算每一个像素的梯度强度和梯度方向(arct(Iy/Ix))，创建局部梯度方向直方图，从0度到360度，我们分成8份，如果我们计算出来某一个像素的梯度方向在某一个方向区间内，我们就在这个区间投票+梯度强度。看梯度方向直方图里投票数最多的区间。
+        \item 模版旋转统计峰值的方向与0度方向夹角。
+    \end{enumerate}
+\end{itemize}
+
+
+\subsubsection{光照不匹配}
+
+\begin{itemize}
+    \item 算法流程
+    \begin{enumerate}
+        \item 我们将SIFT区域切分成n*n小块，n平方个格子就会得到，n平方个直方图。对于每个直方图我们将其划分为8个方向，这八个方向表示像素梯度强度(SIFT描述符)，通过比较两张图片n平方个像素梯度强度的投票数量，比较每个直方图，求距离。精细度匹配，n=4，量化8个方向，实验结果比较好。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{新图像与数据库训练特征匹配}
+
+对于新输入的一张图像，我们选取几个SIFT descriptor，对于每个SIFT描述符我们在数据库求距离，如果第一近邻与第二近邻距离差异小，则可以舍弃这个特征，若第一近邻和第二近邻(欧几里得)距离差异大，则可以选择第一近邻。
+
+\begin{itemize}
+    \item 算法：
+    \begin{enumerate}
+        \item 对于检测出来的blob斑点圆，使用harris角点中M矩阵的特性，M矩阵反映了图像中梯度的变化信息。
+        \item 使用M计算检测出来斑点圆的变化信息，计算两个半轴的数值，如果说有一个两个轴数值相差很大，那么就要沿着短轴的方向收缩blob检测出来的圆，直到两个轴的数值很大且相近为止。
+    \end{enumerate}
+\end{itemize}
+
+\section{texture纹理}
+
+\subsection{纹理的应用和重要性}
+\begin{itemize}
+    \item 纹理的应用
+    \begin{enumerate}
+        \item 通过纹理来进行图像分类和分割任务
+        \item 通过纹理进行图像合成
+        \item 通过纹理进行形状恢复
+    \end{enumerate}
+    \item 纹理的重要性
+    \begin{enumerate}
+        \item 纹理暗示物体的材质
+        \item 外观
+    \end{enumerate}
+    \item 纹理的问题
+    
+    边缘检测和SIFT描述难以很好地描述纹理。
+
+
+\end{itemize}
+
+\subsection{纹理的表示方法}
+\begin{itemize}
+    \item 高斯偏导核+k—means聚类
+    \begin{enumerate}
+        \item 使用x方向的高斯偏导核和y方向的高斯偏导核，求出每一个像素的梯度大小，对于每一个像素的x梯度和y梯度形成一个二维坐标。
+        \item 对于不同的像素点，若在y方向梯度差异大，那么会在左上角，若像素强度平坦则靠近原点，若xy梯度很大就靠近右上角。
+        \item 对这个二维坐标中的点做k-means聚类，对图像每个像素进行分类。
+    \end{enumerate}
+    \item 纹理的尺度特性
+    
+    由于一张图像我们不知道要选用多大的window scale，因此我们可以自适应地使用多个不同大小的框，若不同的检测出来的x，y梯度坐标轴上的统计信息相似(尺度不变)。
+\end{itemize}
+
+\subsection{filter bank滤波器组}
+
+描述edge（高斯偏导核），bar（条带，两边白中间黑的核），spot（LoG），大小，形状
+
+协方差矩阵->高斯偏导核的方向和长短轴。
+
+\begin{itemize}
+    \item 滤波器组中有48个卷积核，我们使用滤波器组对一个图像进行卷积，输出48个卷积核响应后怎么做？
+    \begin{enumerate}
+        \item 通过某个卷积核把相关的响应提取出来。
+        \item 用基元的统计信息（如平均表示法，某个卷积核提取出来的统计信息取均值后像素强度大，说明这个卷积核提取的特征多）
+    \end{enumerate}
+\end{itemize}
+
+\section{Segmentation分割}
+\subsection{分割概念}
+\begin{itemize}
+    \item 过分割
+    
+    把一个完整的物体分割成很多个小块，分割得过细了。
+    \item 欠分割
+    
+    不属于同一目标的很大一块分割到一起去了。
+
+    \item 不同的分割方式
+    
+    \begin{enumerate}
+        \item 自底向上分割
+        
+        底层像素的相似性进行分割
+        \item 自顶向下分割
+        
+        语义相似性进行分割
+    \end{enumerate}
+
+    \begin{enumerate}
+        \item 语义分割
+        
+        知道是某一类
+        \item 实例分割
+        
+        分完后是否是同一个整体
+    \end{enumerate}
+
+    \item 不同的分割特征
+    \begin{itemize}
+        \item not grouped
+        \item proximity
+        \item similarity
+        \item common direction/fate
+        \item common region
+        \item parallelism
+        \item symmetry
+        \item continuity
+        \item closure
+    \end{itemize}
+    但是如何将这些分割特征转换成算法呢？
+
+\end{itemize}
+
+\subsection{分割算法}
+
+\begin{itemize}
+    \item 相似的像素属于同一个物体
+    
+    这个方法的缺陷1. 我们知道两个东西是同一种类别，但是不知道是否是同一个东西。(通过加入坐标来解决)
+    \begin{enumerate}
+        \item 聚类
+        \begin{itemize}
+            \item K-means：收敛到局部最优解；需要挑选K类；对初始化敏感（密度法）； 对外点敏感；仅仅发现球形
+            \item Mean shift clustering:寻找特征空间的局部密度中心极大值
+            
+            不用假设圆形聚类，对外点鲁棒；计算复杂性高(如果几个窗口相遇，则可以合并成一个窗口)，对高维特征效果较差(维度灾难，100个点升1000维,那每一个点周围都没有近邻了)。
+            \begin{enumerate}
+                \item 在整张图中随机选取一个点，半径为r的一个圆范围（window size：窗口大小小，容易陷入局部最优解；扩大窗口大小可能可以越过局部最优解）
+                \item 统计圆内重心偏向，
+                \item 移动原来重心(均值漂移)直到收敛
+            \end{enumerate}
+        \end{itemize}
+        \item 图
+        
+        图的一个节点是图像中的一个像素；图的边是两个像素的相关性，边上的权重是两个节点的相似度。
+
+        idea：在图中找到的切割边权重加起来最小，就是把相关性比较低的边剔除掉。
+
+        如何计算两个点之间边的权重（相似性）
+        \begin{enumerate}
+            \item $simility=\exp(-\frac{1}{2\sigma^2}dist(x_i,x_j)^2)$
+            \item $\sigma$小，一组像素只能包含相邻的几个点，因为相似性随着距离下降很快；$\sigma$大，一组像素包含稍微远的几个点，因为相似性随着距离下降很慢。
+        \end{enumerate}
+
+        graph cut图割方法
+
+        \begin{itemize}
+            \item minimum cut 
+            
+            切除图中的边，边的权重和最小
+            这种图割方法会切除很多很细小的独立区域
+            \item normalized cut归一化图割
+            
+            公式：$\frac{w(A,B)}{w(A,V)}+\frac{w(A,B)}{w(B,V)}$
+            w(A,B)是切割的两个部分A和B，A中像素点和B中像素点的连接边权重之和且让其最小，V是除了A像素图中的其他像素。若A只切割成一个像素，那么分母将会很小，归一化图割的数值会变大，所以能避免把图中像素切割出独立像素的情况。
+
+            公式：$\frac{y^T(D-W)y}{y^TDy}$
+            这个公式我们求$y^T$，$y^T$是每一个像素对应第几个类别。W是相似度邻接矩阵，定义$\sigma$，求两个像素之间的距离填入相似度邻接矩阵。D是对角矩阵，D11是W第1行数值之和。
+
+            如何求解：拉格朗日乘子法
+            分子A，分母B，最小化L=A-$\lambda$B,求导=0，第一小的特征值是0，选择第二小的特征值对应的特征向量。
+            求出的y需要设置门限，来决定类别。
+
+            多类分割：迭代/kmeans
+        \end{itemize}
+        \item 使用纹理作为特征表示
+        
+        使用响应结果进行k-means
+
+        但是有一个缺陷，对于一个目标轮廓，卷积核小框会识别背景和前景，在目标内部由于像素值差异，也会产生一个轮廓，解决方法：两个轮廓相似度，一个包在另一个去掉一个
+    \end{enumerate}
+
+\end{itemize}
+
+\section{Recognition识别和词带(bag of word)模型}
+
+图像表达(图像表示成向量，纹理表示，词带模型)->分类方法(产生式：已知内部发生规律然后建模出来，产生式模型建模似然（通过大量某个类别的样本，建立此类别的正态分布模型）和先验（在过去你给我看的图大概率是什么类别或者不是什么类别），后验概率：给定图像判断是否是某个类比，先验概率某一个类别出现的概率和似然通过一个类别建立的分布模型；判别式：两个类别之间的差异，建模后验；混合式)->模型学习(监督级别，全量/增量学习，先验的定义（引入领域知识），判别性负样本)->识别(搜索策略：滑动窗口，位置尺寸角度类别，非极大值抑制：一个人脸会有很多框)
+
+\begin{itemize}
+    \item 词带(频率直方图)模型
+    \begin{enumerate}
+        \item 直方图构建：先对一张图片进行提取特征，构建直方图，x轴为词汇，y轴为频率，学习视觉词汇，通过一张图的视觉词汇频率直方图来表示一张图像
+        \item 特征提取图像->区块：（SIFT/构建词汇表词汇数量对图像等分提取SIFT）特征提取->normalize patch归一化特征patc h->compute(SIFT 128维) descriptor
+        \item 词典直方图构建（词典大小n维）：把SIFT的特征做聚类，记录每个类的中心(码本)。类别的个数就是码本/视觉词汇/聚类中心(codebook=visual vocabulary)的总个数。一张图像表示多少维是由词典个数维度。每个词汇中的向量表示被叫做codevector/visual word视觉单词。
+        
+        词典数量：如果过多，导致许多相似但是略有不同的特征也会分为不同的类别，导致过拟合；如果过少，那么两个差异较大的特征将会分成同一类。我们一般选取特征数量的10到100倍。
+        
+    \end{enumerate}
+    \item 词带模型的空间位置关系
+    
+    使用空间金字塔对词带模型进行改进。整图一个词带，将图像进行2*2分块，每一块一个词带，将图像进行4*4分块，每一块一个词带。最后拼接起来进行更加细粒度的匹配，对每一块的位置关系进行匹配。
+    
+\end{itemize}
+
+\section{object detection目标检测}
+
+\subsection{boosting}
+
+弱分类器公式$h_j(x) = \begin{cases} 1 & \text{if } f_j(x) > \theta_j \\ 0 & \text{otherwise} \end{cases}$
+
+强分类器公式$h(x) = \begin{cases} 1 & \text{权重*弱分类器的分数大于全部投1一半权重之和} \\ 0 & \text{otherwise} \end{cases}$
+
+\subsection{Viola-Jones face detection}
+
+\begin{itemize}
+    \item 算法流程
+    \begin{enumerate}
+        \item 积分图integral image
+        
+        使用前缀和和差分进行快速计算。
+
+        \item boosting特征选择。滤波器在卷积时候使用积分图加快计算
+        
+        如何选择弱分类器门限：对一张图像每一个位置在进行弱分类器分类之后的输出分数进行枚举画频率直方图，找到频率高的分数作为门限大概率会比较好。
+
+        如何选择好的filter:初始对每一个特征的权重进行归一化，每一个权重一样。如果分类分错了，我们要考虑当前特征的重要性，如果重要性越大，赋予此特征更大的权重。
+
+        计算完每个分类器的误差后，挑选出误差最小的分类器。
+
+        降低正确分类的特征的权重（计算特征权重） ，$\beta=\frac{\epsilon_t}{1-\epsilon_t}$,如果特征分类正确，那么$\beta<1$,$w_{t+1,i}=w_{t,i}\beta_t^{1-|h_t(x_i-y_i)|}$
+
+        计算强分类器中每个弱分类器的权重（计算分类器权重）：$\alpha_t=log\frac{1}{\beta_t}$,对于错误率低的分类器，我们要给它分配较大的权重
+
+        \item Attentional cascade for fast rejection of non-face windows级联结构分类器
+        
+        只解决前一个分类器没有解决的问题。
+        
+        第一阶段在某一个负正率的情况下达到一定精度x，正样本要以很高的精度通过，负样本不能超过检测样本数量的(1-x).通过的不一定是人脸，没通过的一定是人脸。
+
+        第二阶段将第一阶段分为负正的样本，同样搞定(1-x)
+
+        正确的样本有哪些没有检测到=detection rate=漏检率，false positive rate误检率决定了每个阶段的复杂性（负正率）
+
+        \begin{itemize}
+            \item 设置每个阶段的目标检测率和误检率
+            \item 每一个阶段都有强分类器进行boosting算法检测
+            \item 查看误检率是否达到设置要求，那么添加下一个阶段，直到最后负正率足够小
+            \item 使用当前阶段使负正样本作为下一阶段的训练样本。
+        \end{itemize}
+        
+    \end{enumerate}
+    
+\end{itemize}
+
+\subsection{Dalal-Triggs pedestrian detection}
+
+算法：
+训练图像64*128，把图像分成16*16的多个block，对16*16的block分成4块，每一块是8*8的，8*8的区域提取9维梯度方向直方图。移动第二个区域与第一个区域重叠8个像素。105个区域，每个区域用36维梯度直方图表示。用3780向量表示。
+
+训练支撑向量机并且进行非极大值抑制。
+
+\section{图像增强：直方图均衡}(做题)
+
+\subsection{空间域增强}
+
+空间域增强是直接对图像的各像素进行处理
+
+图像增强的点运算
+
+\begin{itemize}
+    \item 灰度变换
+    
+    灰度变化可调整图象的灰度动态范围或图像对比度.
+    \begin{enumerate}
+        \item 线性变换
+        \item 分段线性变换
+        \item 非线形变换
+        \item 伽马变换
+    \end{enumerate}
+\end{itemize}
+
+\subsection{频率域增强}
+
+频域增强是对图像进傅立叶变换后的频谱成分进行处理，然后逆傅立叶变换获得所需的图像。
+
+
+直方图修整法
+
+\begin{itemize}
+    \item 灰度变换
+    
+    灰度变化可调整图象的灰度动态范围或图像对比度.
+    \begin{enumerate}
+        \item 直方图均衡化
+        \item 直方图规定化
+    \end{enumerate}
+\end{itemize}
+
+\end{document}

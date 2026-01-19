@@ -1,0 +1,60 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools,wallpaper}
+\usepackage{t1enc}
+\usepackage{pagecolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{float}
+\usepackage{numerica}
+
+
+\begin{document}
+
+\section{Advanced-Topics-in-Computability-Theory}
+
+\subsection{The recursion Theorem递归定理}
+
+\begin{itemize}
+    \item 制造一台图灵机，这台机器忽略其输入并打印出自身描述的副本，我们将此机器称为SELF。
+    \item 引理：存在一个可计算函数q:从字符集映射到字符集，其中如果w是任意字符串，q(w)是图灵机$P_w$的描述，该图灵机能够输出任意字符串w然后停机。
+    \item 构造输出自身的可计算函数：Q="输入字符串w 
+    
+    1.构建以下图灵机$P_w$。1. $P_w$=“在任意的输入：1.擦出输入 2.在磁带上写下w 3.停机” 
+    
+    2.输出<$P_w$>"
+
+    \item 如何构造SELF
+    \begin{enumerate}
+        \item A=$P_{<B>}$并且B=“在输入<M>,M是图灵机的一部分：1.计算q(<M>) 2.将结果和<M>结合形成完整的图灵机 3.打印图灵机的描述并停止”
+        \item 过程：首先A运行，并且在纸带上打印<B>；接着B运行，B查看纸带并且发现输入<B>;B计算q(<B>)=<A>并且将<A>与<B>结合称TM的描述<SELF>;B打印描述并且停机。   
+        \item 定理：Let T be a Turing machine that computes a function t \(: \sum ^{*} ×\sum ^{*} \to \sum ^{*}\) .There is a Turing machine R that computes a function \(r: \sum ^{*} \to \sum ^{*}\) , where for every \(w\) , \[r(w)=t(< R>, w)\]
+        
+        对于任意输入 $w$，机器 $R$ 的输出等于把 $R$ 自己的编码 $\langle R \rangle$ 和输入 $w$ 一起交给 $T$ 计算的结果。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Turing reducibility图灵可归约性}
+
+\begin{itemize}
+    \item 谕示图灵机（self contained）
+    
+    一个语言 \( B \) 的谕示是一个外部设备，它能够回答任何字符串 \( w \) 是否是 \( B \) 的成员。一个谕示图灵机是一种改进的图灵机，它具有查询谕示的额外能力。我们用 \( M^B \) 表示一个配备了语言 \( B \) 的谕示的谕示图灵机。
+
+    \item Turing reducibility
+    
+    定义：语言 $A$ 是图灵可归约到语言 $B$ 的，记作 $A \leq_T B$，如果 $A$ 相对于 $B$ 是可判定的（即存在一个谕示图灵机 $M^B$ 可以判定 $A$）。
+    
+
+\end{itemize}
+
+\subsubsection{$E_{TM}$ is undecidable}
+
+$E_{TM}$是“图灵机语言是否为空”的问题，也是不可判定的。证明
+
+
+
+\end{document}

@@ -1,0 +1,203 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools,wallpaper}
+\usepackage{t1enc}
+\usepackage{pagecolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{float}
+\usepackage{numerica}
+
+
+
+\begin{document}
+
+\section{From Analog media to Digital Sampling}
+
+\subsection{模拟音频技术的历史}
+\subsubsection{唱片record player}
+\begin{itemize}
+    \item 唱片主要由turnable(转盘)，tonearm(唱臂)，stylus(唱针)三个部分组成
+    \item 唱片上，唱臂的末端唱针是如何还原唱片的声音
+    \begin{enumerate}
+        \item When the record is rotated, tiny indentations in the walls of the groove moves the stylus.
+        \item Movements of the stylus create a fluctuation in the electromagnetic field that induces an electric current in a coil.
+        \item This current is sent to the amplifier, which reproduces the original sound.
+    \end{enumerate}
+    \item Hi-Fi(high fidelity高保真) is used to provide faithful sound reproduction.
+    \item 黑胶唱片(vinyl records)缺点
+    \begin{enumerate}
+        \item It is difficult to keep records scratch free which produces popping noises(唱片划痕会产生噼啪声).
+        \item Groove lock causes sections to repeat over and over again.(纹道卡滞导致部分内容反复播放)
+        \item Records wrap if is close to a heat source making them unplayable.(唱片若放在热源附近可能会翘曲，导致无法播放)
+    \end{enumerate}
+\end{itemize}
+\subsubsection{Tape/磁带/cassette}
+\begin{itemize}
+    \item 缺点
+    \begin{enumerate}
+        \item Cassette has slow recording and playing speed.
+        \item Cassette has narrow tracks. 
+        \item Cassette has limited fidelity.
+    \end{enumerate}
+\end{itemize}
+
+\subsection{数字音频的存储storing digital audio}
+\begin{itemize}
+    \item 存储设备
+    
+    CDs, hard drives, solid-state memory.
+
+    \item 声卡(sound card)
+    \begin{enumerate}
+        \item From analog input to digital output(从模拟输入到数据输出)
+        \begin{itemize}
+            \item 模拟输入(analog input)
+            \item 抗混叠滤波(anti-aliasing filter)
+            \item 采样
+            \item 量化(Quantization)
+            \item 数字输出(digital values store in the computer)
+        \end{itemize}
+        \item sample rate (采样率) 和 number of bits(位数)
+        \item 录音时注意声卡的输入电平，输入信号过强(输入信号overloading过载)，信号顶部波形导致削波，造成失真。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Clipping 削波}
+
+\begin{itemize}
+    \item 定义：削波 is a form of amplitude distortion where the signal peaks are clipped off.
+    \item 削波会导致波形的改变，波形改变会影响timbre(音色)。削波也会导致额外的distortion harmonics失真谐波。
+    \item Hard clipping(硬削波) VS soft clipping(软削波)
+    \begin{enumerate}
+        \item 硬削波是当信号超过数字系统所能处理的最大电平时，其高于最大电平的部分将会被完全截断，产生一个平坦的顶部。硬削波将会为digital recording引入harsh unpleasant quality.
+        \item 软削波是当信号幅度接近或超过阈值时，其增益会被平缓地渐进地降低，波形顶部被圆滑地压缩。软削波是以饱和(saturation)的形式呈现。
+    \end{enumerate}
+
+\end{itemize}
+
+
+\subsection{analog saturation}
+saturation rounds the corners of the waveform.饱和使波形的棱角更加圆滑。
+
+\subsection{sampling rate采样率}
+\subsubsection{采样率}
+\begin{itemize}
+    \item 定义：采样率是声卡中模数转换器每秒采集的音频信号样本数。
+    \item Hertz(Hz)为单位，典型值为44.1kHz，48kHz，96kHz，192kHz。
+    \item 441000Hz来源(technical技术,psychoacoustics心理声学)：
+    \begin{enumerate}
+        \item 视频1s的帧数*采样线数量*每条线存储的样本数=60*245*3=44100
+        \item 人类能听到20Hz到20KHz之间的频率，因此也不需要更高的采样频率了。
+    \end{enumerate}
+    \item 48kHz常用于professional audio situation.
+    \item 8kHz低采样率主要用于speech signals。
+    \item 高采样率可以获得更多的高频信息，获得更好的音质；但是意味着更多的样本，更多的数据，需要更多的存储空间，更多的数据要被处理
+\end{itemize}
+
+\subsubsection{Shannon's Theorem香农定理}
+定义：若信号的最高频率不大于采样频率的一半，则可以从采样样本中精确重建任何信号。$f_{max}\leq F_{s}/2$。$f_{max}$为信号最高频率，$F_{s}$为采样频率。
+$F_{s}/2$也被称为 Nyquist frequency.
+
+\subsubsection{Anti-Aliasing Filter 抗混叠滤波器}
+
+由于一个信号是由很多信号组成。抗混叠滤波器被用于抑制信号中高于奈奎斯特频率的信号成分。
+
+\section{Quantization and Compression量化和压缩}
+
+\subsection{Quantization}
+\subsubsection{bits 位数}
+用于表示analog value的位数(bits)越多，对原始波形的表示越精确。bits通常以$2^n$级增长。
+
+\begin{itemize}
+    \item bit depth比特深度
+    对声音采样的位数。更多的比特位数意味着更多的存储空间，位深越大，数字信号振幅变化越细微。
+\end{itemize}
+\subsubsection{Signal noise ratio(SNR) 信噪比}
+
+定义：信噪比是正确的(pure)的信号功率与由于量化过程所引入噪声的功率之比。
+$SNR=P_{signal}/P_{noise}$
+
+
+
+\begin{itemize}
+    \item SNR是信号质量的指标，单位为decibel(dB)
+    \item dB是无量纲单位，用于描述两种现象的相对功率/强度。
+    \item 信噪比取决于信号选择的位深度。任何以给定比特深度编码的信号都将具有相同的信噪比。
+    \item 如何得到量化后的噪声？
+    
+    具体来说，我们画出模拟信号的时域图，以及量化后信号时域图，模拟信号与量化信号中间缺少的面积，就是量化噪声
+\end{itemize}
+
+\subsection{Dynamic Range动态范围}
+dynamic range是在给定比特深度下可表示的音频信号最大振幅和最小振幅的比值。但是一般来说将本底噪声作为最小振幅即可，因为信号的最小振幅比本地噪声信号更低。
+
+以下为理想情况下信噪比和位深公式
+$SNR_{db}=6.02_{db}*Nbits+1.76dB$
+
+16bits->89dB,但是制作者会对音频进行动态压缩处理使音频中最安静和最响亮之间的差异减小，提高音频整体音量，但是失去音频的细腻感(subtlety)。
+
+\begin{itemize}
+    \item 声卡的最大允许振幅不受动态范围(位深)的影响
+    \item 
+\end{itemize}
+
+\subsubsection{Sensitivity of the ear人耳的灵敏度}
+\begin{itemize}
+    \item 人耳的频率范围大概20Hz到20kHz，对2到4kHz最敏感，动态范围大概96dB
+    \item 大致疼痛阈值：130dB；听力损伤：>90dB；正常对话60-70dB
+    \item 正常听力范围约为500Hz至2kHz，低频为元音和低音，高频是辅音
+\end{itemize}
+
+\subsubsection{Loundness响度}
+
+\begin{itemize}
+    \item 响度是整个录制波形的平均电平，取决于一段时间内测得的音量。改变录音的响度会改变录音的动态范围，
+\end{itemize}
+
+\subsection{音频存储格式}
+
+\subsubsection{Wav Files}
+
+\begin{itemize}
+    \item Wav(Waveform audio files)
+    
+    优点：WAV是一种为专业音频制作设计的、无压缩且完全无损的格式，通过脉冲编码调制技术提供最高音质和最佳编辑性能，
+    
+    缺点：但是文件体积大，不能提供像FLAC格式丰富的元数据标签，且最初for window，现在都可以。
+
+    WAV is a standard format in professional audio. It is designed to be uncompressed and completely lossless, utilizing Pulse Code Modulation technology to deliver the highest sound quality and optimal performance for post-production editing, at the cost of very large file sizes.
+
+    \item AIFF(Audio interchange file format)
+    
+    AIFF是一种为专业音频制作设计的、无压缩且完全无损的格式，通过脉冲编码调制技术提供最高音质和最佳编辑性能，但是文件体积巨大，最初for Mac。
+
+    \item MP3(MPEG-2 Audio Layer III)
+    
+    MP3是有损压缩，通常人们无法听到极高频率的细节，因此高频部分信号会先考虑被压缩。
+
+    \begin{itemize}
+        \item 优点：MP3是有损压缩，将文件大小压缩到更compact level，可在移动设备或者消息传播中使用。通常压缩音频的高频部分以及冗余声音。
+        \item 缺点：MP3压缩会丢失音频的部分信息，降低音频质量，如果是吉他等乐器，过度压缩会使音频失真。
+    \end{itemize}
+
+    \item M4A(MPEG-4)
+    
+    M4A是有损压缩，使用Advanced Audio Coding(AAC)进行编码，提供与MP3相同的比特率并且压缩率更高。
+
+    \item FLAC(Free lossless audio codec自由无损音频编解码器)
+    
+    优点：FLAC是无损压缩，音频质量好，并且数据大小为CD的一半，对许多设备均兼容。
+    缺点：FLAC文件大小比MP3大6倍。
+
+    
+    M4A是有损压缩，使用Advanced Audio Coding(AAC)进行编码，提供与MP3相同的比特率并且压缩率更高。
+\end{itemize}
+
+
+\section{Frequency Analysis频率分析}
+
+\end{document}
