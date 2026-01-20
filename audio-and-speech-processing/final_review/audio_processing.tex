@@ -198,6 +198,735 @@ $SNR_{db}=6.02_{db}*Nbits+1.76dB$
 \end{itemize}
 
 
-\section{Frequency Analysis频率分析}
+\section{Frequency Analysis频率分析基础1}
+
+\subsection{Fourier Theory傅立叶理论}
+
+任何周期性函数f(t)都可以通过一系列频率不断增加的正弦项和余弦项的总和来构成。
+
+\subsubsection{不同的波形}
+\begin{itemize}
+    \item sawtooth锯齿波
+    
+    含基波和所有整数倍的谐波
+    \item square wave方波
+    
+    含基波和奇次谐波，第n个奇次谐波的振幅=$\frac{1}{n}$*基波振幅
+    \item Triangle wave三角波
+    
+    含基波和奇次谐波，第n个奇次谐波的振幅=$\frac{1}{n^2}$*基波振幅
+    \item Double triangle wave双三角波
+    \item Parabola signal
+\end{itemize}
+
+\subsubsection{Fourier Transform傅立叶变换}
+
+公式：$F(\omega)=\int_{-\infty }^{\infty} f(t)e^{-j\omega t} \,dt $
+
+$\omega$是角频率(radian frequency)，f(t)是时间信号time signal,$e^{-j\omega t}$是复指数函数。
+
+等价于：$F(\omega)=\int_{-\infty }^{\infty} f(t)(cos(\omega t)-jsin(\omega t)) \,dt $
+
+复指数函数可以描述单独使用相位为0的正弦函数或者余弦函数所不能描述的周期性函数，复指数函数由余弦和正弦波共同组成。
+
+\subsubsection{phase相位}
+相位的移动相当于时间的偏移
+$x(t-\tau )=sin(\omega(t-\tau))=sin(\omega t+\phi )$
+
+\section{Frequency Analysis频率分析基础2}
+
+\subsection{Fourier transform}
+\begin{itemize}
+    \item 本质：测量波形f(t)与频率为$\omega$的各余弦波$cos(\omega t)$和正弦波$sin(\omega t)$之间的相似度。
+    
+    \item 通过傅立叶变换公式，将$e^{jwt}$通过欧拉公式变为$cos(\omega t)-jsin(\omega t)$后与信号f(t)相乘，对于每一个时间点幅值，如果信号和sin/cos相似度大，那么乘积也大；若相似度小，乘积接近0，比如一个在顶峰，但是另一个在0附近，那么乘起来接近0。正数负数不影响，数值代表能量。
+
+    \item 因此傅立叶变换本质上衡量信号f(t)与频率$\omega$处的复指数信号之间的相似度。
+\end{itemize}
+
+\subsection{Frequency spectrum频谱}
+
+频谱$F(\omega)$是信号f(t)经傅立叶变化后的结果。对于每一个选定的频率$\omega$，复数F($\omega$)的值量化了信号f(t)中含有该频率成分的幅值(复数的实部)和相位(角度值，相当于负数的虚部)。频谱就是信号在所有频率点上的成分含量分布图。
+
+\begin{itemize}
+    \item 复数$F(\omega)$的幅值：$|F(\omega)|=\sqrt{real(F(\omega))^2+imaginary(F(\omega))^2}$
+    \item 复数$F(\omega)$的相位：$\theta=tan^{-1}(\frac{Imaginary(F(\omega))}{Real(F(\omega))})$
+    \item magnitude spectrum幅值谱：信号中各个频率成分的强度（能量）分布
+    \item phase spectrum相位谱：各频率成分在时间轴上的相对起始位置
+    \item 我们更关注一个音频中频率成分的强度：对于一个可听见的频率成分，其幅值大小决定了我们的感知响度。
+    \item 正负频率:
+    \begin{enumerate}
+        \item 一个正弦波可以分解为两个旋转的复指数(正频率成分和负频率成分)之和$Asin(\omega t)=A(\frac{e^{j\omega t}-e^{-j\omega t}}{2j})$ 
+        \item $Acos(\omega t)=A(\frac{e^{j\omega t}+e^{-j\omega t}}{2})$ 
+
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Continuous-Time Fourier Transform(CTFT)连续傅立叶变换}
+
+\begin{itemize}
+    \item Continuous-Time Fourier Transform 公式：
+    $X(\omega)=\int_{-\infty }^{\infty} x(t)e^{-j\omega t} \,dt $
+
+    \item inverse CTFT公式:
+    $x(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}X(\omega)e^{jwt} \,dw$
+
+    \item 在连续傅立叶变换中，时间变量为t(单位是s),频率变量为$\omega$(单位为弧度radians)
+
+\end{itemize}
+
+\subsection{Discrete Fourier Transform(DFT)离散傅立叶变换}
+
+连续傅立叶变换=离散傅立叶变换求和
+
+\begin{itemize}
+    \item Continuous-Time Fourier Transform 公式：
+    
+    $X[k]=\sum\limits_{n=0}^{N-1} x[n]e^{-j\frac{2\pi}{N}kn}$,k=0,1,...,N-1
+
+    \item inverse DFT公式:
+    
+    $x[n]=\frac{1}{N}\sum_{k=0}^{N-1}X[k]e^{j\frac{2\pi}{N}kn}$,n=0,1,...,N-1
+
+    \item 离散傅立叶变换中，时间为样本索引n,频率为frequency bin index k。
+    
+    \item 赋予n和k物理意义
+    \begin{enumerate}
+        \item 假设采样周期$T_{s}$,隔多少秒采样一次，$t_{n}=n*T_{s}$
+        \item 假设采样频率$f_{s}=\frac{1}{T_{s}}$,表示每一秒采样几个点。
+        \item 在N点的DFT中，$f_k=k*\frac{f_{s}}{N}$,$\frac{f_{s}}{N}$表示你可以把这N个采样点分得有多细(比如你的眼睛能看到60Hz，你要观察600Hz，60/600=0.1Hz，那么600被你分成了每次观察0.1Hz，随着N得增大，相当于你观察得更加精细了)。
+        \item $f_k=k*\frac{f_{s}}{N}$表示第k个点的物理频率。
+        \item 公式:$X(f_{k})=\sum\limits^{N-1}_{n=0}x(t_{n})e^{-j2\pi f_{k}t_{n}}$
+    \end{enumerate}
+
+\end{itemize}
+
+\subsection{Fast Fourier Transform快速傅立叶变换}
+\begin{itemize}
+    \item 应用
+    \begin{enumerate}
+        \item 解决DFT潜逃循环效率低的问题，加速计算
+        \item 信号长度为2的幂时效果好，若N为质数则无性能提升
+    \end{enumerate}
+\end{itemize}
+
+\subsection{FFT代码演示步骤}
+\begin{itemize}
+    \item 频谱重排
+    \item FFT计算
+    \item 频谱特征计算
+\end{itemize}
+
+\subsection{Windowing}
+\subsubsection{引入}
+\begin{itemize}
+    \item 离散信号频谱推论：频谱是以采样率$F_s$为周期的无限周期函数。假设信号本身频率为f0，那么频谱会在f0+/-Fs,f0+/-2Fs出现峰值。
+    \item 1024.5Hz不是 FFT 的频率箱（间隔是 1Hz，没有 0.5Hz 的箱），此时信号的周期不是 “采样点数的整数倍”，信号在 “FFT 的输入长度内” 是不完整周期，因此开头和结尾无法衔接。
+    \item 当信号频率恰好等于 FFT 的某一个频率箱时，信号在 FFT 输入长度内是完整周期，波形首尾连续；当信号频率不在频率箱上时，信号是不完整周期，波形首尾断裂 —— 这会导致后续的频谱出现 “泄漏”（能量分散到多个频率点）。
+\end{itemize}
+
+\subsubsection{window function}
+
+窗函数通过截取信号的有限时间片段来进行傅里叶变换和相关分析。通过“原始信号” 和 “窗函数” 逐点相乘(改变信号形状，改变信号频谱，新的频谱是信号频谱和窗函数的卷积)，让信号在 FFT 的输入长度内从 0 平滑开始、到 0 平滑结束
+
+\begin{itemize}
+    \item Rectangular window
+    \item Hanning window
+    \item Kaiser window
+\end{itemize}
+
+\subsubsection{Convolution卷积}
+
+公式$y[n]=\sum\limits^{N-1}_{k=0}h[k]x[n-k]$,y是信号x与卷积核h的卷积结果
+
+\section{Frequency Analysis频率分析3}
+
+\subsection{Window function}
+
+\begin{itemize}
+    \item 在计算频谱时，使用窗函数来消除信号两端不连续性。
+    \item 使用矩形窗可以获得尖锐的峰值，但是底部会有大量杂波
+    \item 使用half-cosine窗口(比如hanning)会得到更宽的峰值，减少杂波数量。
+\end{itemize}
+
+\subsubsection{加窗处理+DFT}
+\begin{itemize}
+    \item 公式：$X[k,n_{0}]=\sum\limits^{n_{0}}_{m=n_{0}-N+1}w[m-n_{0}]x[m]e^{(-2\pi k/N)m}$,k=0,1,2,...,N-1
+    \item 窗口w[m-n0]为一个low-pass filter impulse(窗为低通滤波器，因为对于变化缓慢的信号，可以对其波形完整保留，相当于放行低频信号) response，通过傅立叶变化中心频率变为(k/N)Fs,变为带通滤波器(留中间频率，阻挡高频和低频)
+\end{itemize}
+
+\subsubsection{Rectangular window}
+\begin{itemize}
+    \item 公式：$w[n] = \begin{cases} 1, & 0 \leq n \leq N-1 \\ 0, & \text{otherwise} \end{cases}$
+    \item 矩形窗中，其频谱比要测量的每个频率分量的宽度更宽，那么其他频率分量也会泄漏到计算中，频谱表示会收到影响。因此我们要减小矩形框旁瓣信号的影响。
+\end{itemize}
+
+\subsubsection{Hanning window}
+\begin{itemize}
+    \item 公式：$w[n] = \begin{cases} 0.5[1-cos(\frac{2\pi n}{L})], & 0 \leq n \leq N-1 \\ 0, & \text{otherwise} \end{cases}$
+    \item 通带宽度通常为：$2\pi(\frac{4}{L})$
+    \item FrequencyResolution=$\frac{2}{L}f_{s}$Hz
+    \item TimeResolution=$\frac{L}{2}T_{s}$sec
+\end{itemize}
+
+\subsubsection{Hamming window}
+\begin{itemize}
+    \item 公式：$w[n] = \begin{cases} 0.54-0.46cos(\frac{2\pi n}{L}), & 0 \leq n \leq N-1 \\ 0, & \text{otherwise} \end{cases}$
+\end{itemize}
+
+\subsubsection{spectrogram parameter频谱图参数}
+
+\begin{itemize}
+    \item Window length(窗口长度)：窗口长度决定the width of its passband,进而影响frequency resolution.如果L很大，平均更长时间的信号，短暂的时间细节将会被抛弃，频率分辨率会提升(uncertainty principle)。
+    \item The number of analysis frequencies N(总数据长度)
+\end{itemize}
+
+
+\subsection{Zero padding零填充}
+\begin{itemize}
+    \item 零填充是给信号末尾补0的操作
+    \begin{enumerate}
+        \item 适配快速傅立叶变换中信号长度为2的N次方长度的要求，FFT算法在处理2的幂次方长度的信号速度会更快，NlogN
+        \item 让FFT的结果更加平滑：补0后FFT输出点数更多，频谱图看起来更连续。
+        \item 但是补0不会提升真实的频谱分辨率，频谱分辨率的之和原始信号的有效长度有关。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{spectrogram频谱图}
+\begin{itemize}
+    \item 思想：由于有些信号是非周期性的且长度很长，因此将长信号分解成小片段，并使用快速傅立叶变换对每个片段进行傅立叶分析。
+    \item 过程：音频输入->缓冲输入帧->窗函数->快速傅立叶->幅值和功率->深度图
+\end{itemize}
+
+\subsubsection{spectrogram principle}
+
+\begin{itemize}
+    \item 音频信号首先被缓冲为相互重叠的帧，帧大小长度通常为2的幂次。
+    \begin{enumerate}
+        \item 帧就是将很长的信号切成一段一段较短的时间块，每一块称为帧
+        \item 相互重叠的帧：切分时，下一帧的起点并不紧挨着上一帧的终点，而是会往回退一部分，与上一帧共享一部分相同的音频数据。原因是之后对每一帧进行加窗处理，窗口函数会使帧两端的信号幅值被压的很低（以避免边缘不连续而导致的频谱泄漏），如果不让其重叠，帧与帧之间会丢失大量信息。通常重叠帧长度的一半。
+    \end{enumerate}
+    \item 使用窗函数处理，消除帧边缘的不连续性。一般使用hanning窗。
+    \item 进行0 padding，提高频谱图的平滑度。
+    \item 输入至FFT得到复数谱，计算平方幅值(能量/功率分布)，将功率转换为dB ($10log_{10}(P_k)$).
+    \item 最后FFT序列显示为深度图。
+\end{itemize}
+
+\subsubsection{sliding window 滑动窗口}
+
+\begin{itemize}
+    \item 滑动窗口的最小移动量为一个采样点。
+    \item 但是如果信号的频谱不会随时间快速变化，我们可以跳过一些时间点，切不会丢失频谱图的基本形状。
+    \item 滑动窗口每次移动几个样本被称为hop size(跳跃大小)
+\end{itemize}
+
+\section{speech signals and modeling Part1}
+
+语音信号的声音和过度是信息的符号表示。
+
+\subsection{语音信号的表示}
+\begin{itemize}
+    \item waveform representation(波形表示)
+    \begin{enumerate}
+        \item 定义：保留模拟语音信号的原始波形形状，通过采样和量化将模拟信号转换为数字信号。
+    \end{enumerate}
+    \item parametric representation(参数表示)
+    \begin{enumerate}
+        \item 定义：通过语音信号，提取发生模型的关键参数。
+        \item 流程:
+        \begin{itemize}
+            \item 使用数模转换器进行采样，获取数字波形表示
+            \item 通过进一步处理获取发声模型参数
+            \item 模型参数可进一步分类(excitation parameters激励参数(与语音声源相关参数)/vocal tract response pattern声道响应模式(单个语音相关模式))
+        \end{itemize}
+    \end{enumerate}
+    \item 语音参数化表示的问题：
+    \begin{enumerate}
+        \item speech is short time stationary(语音具有短时平稳性)
+        \item 如何制定，选择合适的特征向量表示，以准确捕捉语音信号中的重要信息。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{语音产生机制}
+\subsubsection{发声机制}
+\begin{itemize}
+    \item The vocal tract（声道） is at the opening between vocal cords（声带）,or glottis(声门) and ends at the lips.
+    \item The nasal tract（鼻道） begins at the velum（软腭） and ends in the nostrils（鼻孔）.
+    \item 鼻音的产生
+    
+    When the velum is lowered, the nasal tract is acoustically coupled to the vocal tract to produce the nasal sounds of speech.
+    \item The subglottal system(声门下系统) consists of lungs, bronchi(支气管), and trachea(气管). And the subglottal system serves as a source of energy for speech production.
+    \item 语言的产生
+    
+    Speech is the acoustic wave that is radiated from this system when air is expelled from lungs and the resulting flow of air is perturbed by a constriction somewhere in the vocal tract.
+\end{itemize}
+
+\subsection{speech sound classes}
+
+\subsubsection{voiced sound浊音}
+Voiced sounds are produced by forcing air through the glottis with tension of the vocal cords adjusted so that they vibrate in a relaxation oscillation, thereby producing quasi-periodic pulses of air which excite the vocal tract.
+
+\subsubsection{Short vowel sounds 短元音}
+Short vowels are a group of monophthong sounds characterized by shorter duration compare to long vowels and diphthong.
+
+
+\subsubsection{Weak vowel sounds 弱元音}
+Weak vowels are found in unstressed syllables in English pronunciation. There are 4 weak sounds.
+
+\subsubsection{Reduced vowel sounds 弱化元音}
+Long sounds are shortened if the following sound is a voiceless consonant（清辅音）.
+
+\subsubsection{Diphthong 双元音}
+Diphthongs are long vowel sounds that start in one position of the mouse and end in another within the same syllable.
+
+\subsubsection{Long vowels 长元音}
+
+\subsubsection{Nasal Consonant sounds 鼻音辅音}
+Nasal consonant sounds are made by blocking air in the mouse and releasing sound through the nose.
+
+\subsubsection{Fricatives 摩擦音}
+Fricative sounds are generated by forming constriction at some point in the vocal tract and forcing air through the constriction at a high enough velocity to produce turbulence.
+
+
+\section{speech signals and modeling Part2}
+
+\subsection{4 other excitation types}
+\subsubsection{Plosive 爆破音}
+The plosive sounds result from making a complete closure normally towards the front of the vocal tract, building up a pressure behind the closure and abruptly releasing it.
+
+\subsubsection{Plosive consonant 爆破辅音}
+The plosive consonant sounds are made by completely blocking the flow of the air as it leaves the body.
+
+\subsection{voice production声音产生}
+
+\subsubsection{基频}
+\begin{itemize}
+    \item 基音周期$F_o$：The time between successive vocal fold openings is called fundamental period T0.（声带完成一次完整开合振动的循环所需要的时间）
+    \item 发声的基频$T_o$：The rate of the vibration is called fundamental frequency of the phonation.（每秒钟完成的开合振动循环次数）
+    \item $F_o=\frac{1}{T_o}$
+\end{itemize}
+
+\subsubsection{Pitch音高}
+Pitch refers to the perceived fundamental frequency of a sound.
+
+\subsubsection{Fundamental frequency VS Pitch}
+\begin{enumerate}
+    \item Fundamental frequency is an objective and physical property of the sound wave. It is the actual rate at which the vocal folds vibrate.
+    \item Pitch is a subjective and perceived fundamental frequency of a sound.
+\end{enumerate}
+
+\subsubsection{Prosody韵律}
+\begin{itemize}
+    \item Stress refers to a change in fundamental frequency and loudness to signify a change in syllable, word or phrase. 
+\end{itemize}
+
+\subsubsection{Formants共振峰}
+\begin{itemize}
+    \item As the sound generated propagates down the tubes formed by vocal and nasal tracts, the frequency spectrum is shaped by the frequency selectivity of the tube. The resonance frequencies of the vocal tract tube are called formant frequencies or formants.
+    \item The resonance frequencies of the vocal tract show up as dark bands（这些共振峰频率所在的位置，因为能量强，就会显示为水平方向的深色条纹。看这些条纹的位置，就能知道发的是什么元音。）.
+    \item Voiced region are characterized by a striated or narrow appearance due to periodicity in the waveform, while unvoiced intervals are more solidly filled in.
+\end{itemize}
+
+\section{Speech Synthesis 语音合成 Part 1}
+
+\subsection{Hourglass idea 沙漏思想}
+\subsubsection{文本分析 Text analysis}
+\begin{itemize}
+    \item Text Normalization(文本规范化)
+    \begin{enumerate}
+        \item 多个用户输入的原始文本，将相同意思的文本转换为同一个表达
+    \end{enumerate}
+    \item Phonemic Analysis(音位分析)
+    \begin{enumerate}
+        \item Phonemic音位定义：音位是语言系统中能区别词义的最小单位，/p/ 和 /b/ 是两个不同的音位。
+        \item allophones音位变体定义：音位变体是某个音位在实际口语中具体表现出来的各种不同的物理声音，是同一个音位在不同语音环境下的具体表现形式。
+        \item The process of analyzing a spoken language to figure out:
+        \begin{itemize}
+            \item what its phonemes are
+            \item what the allophones are of those phonemes
+            \item what each allophone's distribution is
+            \item 这个过程又被称为 phonemicization of the language（语言的音位化）
+        \end{itemize}
+    \end{enumerate}
+    \item Prosodic Analysis(韵律分析)
+    韵律分析是基于语言在不同语境中的重音和语调模式，是语法和意义分析的基础。
+    \begin{enumerate}
+        \item 给定 string of phones
+        \item prosody分析
+        \begin{itemize}
+            \item Desired F0 for the entire utterance（整个话语的期望基频）
+            \item The duration（时长）of each phone
+            \item Stress value for each phone and accent value
+            \item intensity
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{4 types methods for synthesised speech}
+\subsubsection{Articulatory synthesis(发音合成)}
+
+Articulatory synthesis models the physics of the human speech production system.（发音合成模拟人类语言产生系统的物理机制）It models the movement of articulators like the lips, tongue, and glottis using biomechanical principles. And the data is derived from X-ray analysis of natural speech.
+
+\subsubsection{Formant synthesis共振峰合成}
+
+Formant synthesis models the resonances of vocal tract by a linear speech model.（共振峰合成使用线性语音模型模拟了声道的共振峰）.
+
+Formant synthesis generates speech by modeling the resonant frequencies (formants) of the vocal tract using a set of adjustable bandpass filters. A periodic source excites these filters to produce voiced sounds, while noise is used for unvoiced sounds. By controlling the formant frequencies and bandwidths, it can produce a wide range of speech sounds, though the output often has a characteristic mechanical quality.
+
+
+\begin{itemize}
+    \item Resonator filter谐振器滤波器
+    
+    Resonator filter是特殊的IIR滤波器，公式为：
+
+    $H(z)=\frac{1}{1-2rcos(\theta)z^{-1}+r^2z^{-2}}$
+    \begin{enumerate}
+        \item $\theta=\frac{2\pi f}{F_{s}}$,共振峰频率是f，采样频率是$F_{s}$
+        \item 共振峰带宽BW与r相关联，BW=2(1-r)
+    \end{enumerate}
+
+    \item Rule-based formant synthesis（基于规则的共振峰）
+    
+    可以通过制定一套规则确定使用共振峰合成器合成所需话语所必须的参数：
+    \begin{enumerate}
+        \item Voicing fundamental frequency（F0）发声基频
+        \item Degree of voicing in excitation(VO)激励发声程度
+        \item Formant frequencies and amplitudes(F1,F2...,Fn;A1,A2...,An) 共振峰频率和振幅
+        \item Frequency of an additional low-frequency resonator（FN） 附加低频谐振器频率
+        \item Intensity of low- and high-frequency region 低频和高频区域强度
+    \end{enumerate}
+    \item Cascade formant synthesizer级联共振峰合成器
+    
+    \begin{enumerate}
+        \item A cascade formant synthesizer consists of band-pass resonators connected in series and the output of each formant resonator is applied to the input of the following one. 级联共振峰谐振器由一系列串联的带通谐振器组成并且每一个共振峰谐振器的输出被用于下一个谐振器的输入。
+        \item 优点：
+        \begin{itemize}
+            \item 元音的相对共振峰振幅不需要单独控制
+            \item 适合生成non-nasal voiced sounds（非鼻音浊音）
+        \end{itemize}
+        \item 缺点：
+        \begin{itemize}
+            \item 不可以产生 fricatives and plosive bursts.
+        \end{itemize}
+    \end{enumerate}
+
+    \item Parallel formant synthesizer 并联共振峰合成器
+    \begin{enumerate}
+        \item A parallel formant synthesizer consists of band-pass resonators connected in parallel. The excitation signal is applied to all formant simultaneously and their outputs are summed.
+        \item 优点：
+        \begin{itemize}
+            \item The parallel structure enables controlling of bandwidth and gain for formant individually.
+            \item 适合生成 nasals, fricatives and stop-consonants.（适合生成鼻音，摩擦音，塞辅音）
+        \end{itemize}
+        \item 缺点：
+        \begin{itemize}
+            \item 对比级联式共振峰合成器，并行共振峰合成器产生的元音效果差。
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Concatenative synthesis拼接合成}
+
+Concatenative synthesis uses different length pre-recorded samples derived from natural speech.
+
+\begin{itemize}
+    \item 核心概念：
+    \begin{enumerate}
+        \item 录制语音库
+        \item 检索合适的单元序列
+        \item 拼接调整时长和音高获得更加自然的感受
+        \item 生成波形
+    \end{enumerate}
+    \item 优点：连接预先录制的自然话语是生成清晰且自然的合成语音最简单的方法。
+    \item 缺点：
+    \begin{enumerate}
+        \item 需要大量内存存储录制的声音
+        \item 当声音无法衔接时，出现声音不连贯的现象
+        \item 每一个说话声音需要其本人自己的一系列录音
+    \end{enumerate}
+    \item 选择声音长度
+    
+    选择最好的unit length(单元长度)：要拼接在一起形成声音的 语音单元的长度
+    \begin{enumerate}
+        \item 使用较长的语音单元由一个更高的自然度，更少的拼接点以及对协同发音(coarticulation)更好的控制，但是所需的单元数量和单元存储空间要更多。
+        \item 单元越短，所需的存储越少，但是样本收集和标注过程会变得复杂，单元拼接过程中出现语音不连续性的问题可能性更大。
+        \item 单位的选择包含了words，syllables，demisyllables，phonemes，and diphones.
+        \item word词语单元的选择
+        \begin{itemize}
+            \item 单词内的协同发音效应已经在单词中可以直接捕捉到了，词语的拼接相对容易执行
+            \item 单词拼接适合词汇量较小的场景，且连接独立的单词会让合成语音不自然。
+            \item 每个语言都有很多单词，数据量庞大。
+        \end{itemize}
+
+        \item syllable音节单元的拼接
+        \begin{itemize}
+            \item 音节的数量少于单词
+            \item 音节需要模拟协同发音效应
+        \end{itemize}
+        \item phoneme音位的拼接
+        \begin{itemize}
+            \item 音位的数量比音节更少，只有44个
+            \item 一些音位在单词中没有稳定的目标位置(有多个音位变体)，比如爆破音，难以进行语音合成
+        \end{itemize}
+
+        \item diphones双音位的拼接
+        \begin{itemize}
+            \item 双音位是两个相邻的班音位：连接起来的位置从一个音位的中间沿伸到下一个音位的中间。
+            \item 双音位的长度为一个音位长度
+            \item 音位的中心位置是协同发音效果最显著的区域，是拼接波形的好位置。
+        \end{itemize}
+
+    \end{enumerate}
+
+    \item Diphone synthesis双音位合成
+    
+    \begin{enumerate}
+        \item 录制一名说话者对每个双音位说一个例子
+        \item 标记并切分每个双音位并创建双音位数据库
+        \item 合成一段文本，合成器将单词流分割成双音位序列，并在数据库中查找响应的双音速并将其连接起来，并且在双音位的边界处进行信号处理。
+        \item 通过pitch-synchronous overlap add(PSOLA)改变双音位序列的prosody(F0,energy,duration)，使语音听起来更自然。
+        \item 优点
+        \begin{itemize}
+            \item 双音位合成语音中，所需录制语音单元数量少
+            \item 双音位有助于减轻因协同发音效应引起的问题
+            \item 双音位接受细化调整音韵
+        \end{itemize}
+        \item 缺点
+        \begin{itemize}
+            \item 语音听起来比较单调
+            \item 双音位拼接点失真
+            \item 双音位合成适合发音规则一致性语音
+        \end{itemize}
+    \end{enumerate}
+
+    \item Unit Selection单元选择合成
+    \begin{enumerate}
+        \item 定义：通过构建包含双音位，音节，单词，短语，句子等语音单元的大规模标注语音数据库，在合成时检索并拼接最优语音单元，生成自然度更高的语音。
+        \item 思想：优先复用完整度高的语音单元，减少拼接次数，同时利用大量数据覆盖更多语境。
+        \item 特性:
+        \begin{enumerate}
+            \item 多种语音单元，需要录制海量语音，存储消耗极大，CPU消耗低，需要高效搜索算法
+            \item 需要对数据进行大规模标注，包括语音波形，音位边界，韵律，语境等信息。
+        \end{enumerate}
+        \item 流程
+        \begin{itemize}
+            \item 数据库构建
+            
+            录制多位说话人的通用语音素材，标注单元边界、音位语境、韵律参数等，形成带标签等大型数据库。
+            \item 文本分析
+            
+            对输入文本进行分词，音位转换，韵律预测(确定重音，基频，时长)，形成目标合成参数
+            \item 单元检索
+            
+            通过最小化总代价(目标成本+连接成本)从数据库中筛选最优单元序列
+            \item 单元拼接
+            
+            将选中的单元直接拼接，输出合成语音
+        \end{itemize}
+        \item Target cost(目标成本)
+        
+        \begin{itemize}
+            \item 衡量候选单元和目标合成参数的匹配度
+            \item 核心子成本：重音，短语位置，基频，音位时长，词汇一致性
+        \end{itemize}
+        \item Join cost(连接成本)
+        
+        \begin{itemize}
+            \item 衡量相邻候选单元拼接处的平滑度
+            \item 频谱特征一致性，基频，能量
+        \end{itemize}
+
+        \item 总成本公式
+        $ \hat{u}_1^n = \arg\min_{u_1, \dots, u_n} \left[ \sum_{i=1}^n C^{target}(t_i, u_i) + \sum_{i=2}^n C^{join}(u_{i-1}, u_i) \right]$
+        \begin{itemize}
+            \item t为要合成的目标单元序列
+            \item u为候选单元序列
+        \end{itemize}
+        \item 优点
+        \begin{itemize}
+            \item 单元选择合成的语音质量优于双音位合成，因为可复用完整单词/词语，保留真实语音的韵律。
+            \item 单元之间衔接次数减少，减小不连续性
+            \item 韵律听起来更自然。
+        \end{itemize}
+        \item 缺点
+        \begin{itemize}
+            \item 局部质量不稳定，数据库若缺乏匹配单元，可能出现优质片段和劣质片段混合的情况。
+            \item 较高的计算复杂度，需要高效搜索算法与最小化成本。
+            \item 灵活性低，无法修改选中的单元信号，数据库未覆盖的内容难以生成。
+        \end{itemize}
+    \end{enumerate}
+
+\end{itemize}
+
+
+\subsubsection{AI synthesis}
+
+\begin{itemize}
+    \item HMM Synthesis 隐马尔可夫模型
+    
+    早期数据驱动型AI语音合成技术，从训练数据中学习统计规律，生成语音参数。
+    \begin{itemize}
+        \item 特征
+        \begin{enumerate}
+            \item HMM是一种参数化模型，模型参数量小。
+            \item 数据兼容性强，可以用来自多个说话人的混合数据进行训练
+        \end{enumerate}
+        \item 模型核心逻辑
+        \begin{enumerate}
+            \item Hidden States：每个phoneme+context都对应一个HMM
+            \item 首先提取acoustic feature：基频，频谱，时长
+            \item 使用观测序列进行训练
+            \item 每个音状态输出声学特征，由于生成的声学特征具有不连续性，使用插值对不同基频的特征进行过渡调整，却把皮参数连续性。
+        \end{enumerate}
+        \item 训练过程
+        \begin{enumerate}
+            \item 使用数据库中的语音进行训练
+            \item 提取频谱参数，激励参数，
+            \item 标注输入数据
+            \item 训练HMM
+        \end{enumerate}
+        \item 合成阶段
+        \begin{enumerate}
+            \item 输入文本，进行文本分析，得到音位语境标注，韵律标注等；将标注传入HMM模型身材个很难过激励参数和频谱参数；输入合成滤波器，合成语音
+        \end{enumerate}
+    \end{itemize}
+\end{itemize}
+
+\section{Speech Synthesis3: Text to Speech System}
+
+\begin{itemize}
+    \item Tokenization分词：句子分割，标点处理，单词分割
+    \item Lexical access and morphological analysis(词汇提取和形态学分析)。形态学分析将单词拆分为词素(morphemes):lemma(词干) and affixes(词缀)。
+    \item Grammatical analysis(语法分析):通过词性标注，短句检测，句法分析消除可能影响发音的词性歧义。
+    \item Phonetic translation语音翻译:Transcription(转写) rules处理单词。这些规则通常会根据一个字母的左右语境来生成器语音转写。
+\end{itemize}
+
+\subsection{文本标准化Text Normalization}
+
+
+\begin{itemize}
+
+    \item 过程
+    \begin{enumerate}
+        \item 识别文本中的标记
+        \item 将token分块为大小合理的部分
+        \item 将token映射到单词
+        \item 识别单词类型
+    \end{enumerate}
+    \item 核心目标
+    \begin{enumerate}
+        \item 识别文本中的有效语言单位tokens,剔除无效信息
+        \item 解决文本歧义(如缩写，数字，符号的多义性)
+        \item 将非标准表达(数字，缩写，URL)转化为标准发音形式
+    \end{enumerate}
+    \item 分句(sentence Segmentation)
+    
+    解决"."句号歧义性，既可以表示句子的边界，也可以表示单词的缩写。
+
+    对于句点的消歧，需要识别缩写词，也要识别大写字母对应的是句首字母还是专有名词。
+
+    \item tokens标准化（可以使用决策树进行学习）
+    
+    最简单的分词形式是通过在空格和不属于缩写的标点符号处分割文本来实现。
+
+    非标准词指不符合常规拼写规则、无法直接发音的表达，比如缩写，数字，符号，URL，邮箱(添加特殊token type标识)
+
+    规范拼写形式：复合语言书写规范、可直接映射音素的单词形式(MR. 映射为Mister， 123变为one hundred and twenty-three)
+    
+    非标准词属于分词后得到的语言单位，在执行字素到音素(grapheme-to-phoneme)转换之前要扩展为规范的拼写形式(orthographic form)
+
+\end{itemize}
+
+\subsection{Grapheme to Phoneme Conversion(G2P)}
+
+\begin{itemize}
+    \item 字母，字素，音素
+    \begin{enumerate}
+        \item 字母：书面单词的视觉组成
+        \item 字素：代表音素的单个字母和字母组合
+        \item 音素：口腔发出的声音
+    \end{enumerate}
+
+    \item G2P定义：将书面语的字素序列映射为口语的音素序列
+    
+    \item Orthographic depth正字法深度
+    \begin{enumerate}
+        \item 定义：文字系统中字素与音素对应关系的规则程度
+        \item shallow orthographic浅正字法：字素音素对应高度规则
+        \item Deep orthographic深正字法：字素音素对应不规则（同一字素多种发音/统一发音多种字素）
+    \end{enumerate}
+
+    \item 规则法(letter-to-sound(LTS))
+    
+    \begin{enumerate}
+        \item 使用规则将文本转换为音素，通过前后语境编写字母组合的相关音素
+        \item 优点：无限制词汇量，内存需求量小
+        \item 缺点：规则编写复杂，难以覆盖所有例外情况
+    \end{enumerate}
+
+    \item 词典法(Lexicon-Based)
+    
+    \begin{enumerate}
+        \item 预先构建单词-音素映射词典，并存储进文件中，转换时直接查询单词对应的音素序列。
+        \item 需要构建exceptions lexicon(例外词典)将具有特殊发音的文本或者规则未涵盖的特殊常见文本存在例外字典中(缩写，首字母缩略词，名字)。
+        \item 优点：无需复杂语义判断
+        \item 缺点：词汇量受限，未收录单词无法处理；内存需求量大
+    \end{enumerate}
+
+    \item 先词典，若没有单词，就使用规则法进行转换。
+
+    \item G2P问题
+    \begin{enumerate}
+        \item Homophony（同音异义）
+        \item Homograph disambiguation（同形异义词消歧）
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Syntatic analysis句法分析}
+\begin{itemize}
+    \item Homograph disambiguation 需要 syntactic analysis.
+    \item 句法分析也可以用来确定适当的韵律特征.
+\end{itemize}
+
+\subsection{Prosody Synthesis韵律合成}
+
+\begin{itemize}
+    \item 韵律合成定义：韵律合成包括对短语进行语速，音高模式，停顿以及音素的强度和时长进行标注。
+    \item 流程
+    \begin{enumerate}
+        \item Prosodic Phrasing(韵律短句划分)
+        \begin{itemize}
+            \item 将完整的utterance话语拆分为符合口语习惯的短语单元，确定停顿位置和时长
+            \item 停顿位置通过标点以及句法分析进行确定
+        \end{itemize}
+        \item Accent Prediction(重音预测)
+        \begin{itemize}
+            \item 确定短语中需要重读的音节
+            \item 为重音音节生成pitch contour
+        \end{itemize}
+        \item Prosodic feature generation(为每个音素分配韵律参数值)
+        \begin{itemize}
+            \item Intonation(pitch)
+            \begin{enumerate}
+                \item 避免单调的机器人的声音
+                \item 情景主题
+                \item 陈述句与疑问句
+            \end{enumerate}
+            \item Rhythm(duration/length)
+            \begin{enumerate}
+                \item 语速，停顿，重音
+            \end{enumerate}
+            \item Intensity(loudness)
+            \begin{enumerate}
+                \item 浊音强度随音高成正比例增加
+                \item 话语接近结尾变弱
+                \item 情绪状态
+            \end{enumerate}
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+
+
 
 \end{document}
