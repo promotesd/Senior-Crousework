@@ -74,5 +74,511 @@
     生成式AI能够创建出逼真的虚假信息。Ethical problem：虚假信息传播。
 \end{itemize}
 
+\section{L02-ML-workflow}
+\subsection{机器学习类别}
+
+机器学习包括有监督机器学习和无监督机器学习。有监督机器学习有回归问题和分类问题，分类问题中包括二分类问题和多分类问题。无监督机器学习包括聚类问题。有监督机器学习中，数据集包括其特征以及每个数据的标签；无监督机器学习数据集仅包含标签。
+
+
+\begin{itemize}
+    \item supervised learning监督学习
+    
+    监督学习通过构建基于一个或者多个输入来预测或估计输出的统计模型。训练集中包含特征和响应/标签，模型需要学习到通过新的数据预测响应的方法。
+
+    \item classification分类问题
+    
+    预测离散类别/标签
+
+    \item regression回归问题
+    
+    预测连续的数值
+
+    \item unsupervised learning无监督学习
+    
+    无监督学习是指无需在带有标签的数据上训练模型就可以从数据上提取含义的统计方法。
+    
+    训练数据只有样本特征，没有标签。目的是找到数据中的模式、分组、结构或者内在关系。
+
+    常见任务：降维，聚类，关联规则学习。
+
+    \item clustering聚类
+    
+    在没有预定义标签的情况下对相似的数据进行分组
+\end{itemize}
+
+\subsection{机器学习工作流}
+
+\subsubsection{确认问题类型}
+
+\subsubsection{数据收集}
+
+\begin{itemize}
+    \item manual data collection手动数据收集
+    
+    surveys, interviews, manual labelling
+    \item automated data collection自动化数据收集
+    
+    使用APIs从线上资源自动获取数据
+    \item sensor or IoT data传感器或物联网数据
+    
+    从摄像头GPS或者温度传感器等物理设备获取数据
+    \item Database and Log Data数据库和日志数据
+    
+    从已有的数据库或者系统日志提取数据
+    \item public or open dataset
+    
+    公开数据集
+
+    \item crowdsourcing众包
+
+\end{itemize}
+
+\subsubsection{Data Preprocessing数据预处理}
+Data structuring, handle missing values, normalize or standardize features, and encode categorical variables.
+
+\subsubsection{Feature Engineering特征工程}
+Select, transform or create new features that can improve model performance.
+\begin{itemize}
+    \item 选择最相关的特征
+    \item 将已有的特征通过取对数或者多项式或者interaction terms进行转换
+    \item 从领域知识中创建新的特征
+\end{itemize}
+
+\subsubsection{模型选择}
+根据问题和数据特征选择合适的模型
+\begin{itemize}
+    \item 分类：logistic regression, Naive Bayes, Nearest Neighbor, Discriminant analysis,decision trees, random forest, support vector machine, neural network
+    \begin{enumerate}
+        \item 逻辑回归：可以拟合一个预测属于一类或者另一类二分响应概率的模型
+        \item 判别式分析：假设不同类别依据高斯分布(对于不同的类别，都有自己特别突出的特征)生成数据，通过寻找特征的线性组合对数据进行分类
+        \item K近邻算法：根据数据集中待分类对象最邻近样本的类别来划分其类别
+        \item 朴素贝叶斯：假设某类别中某个特征的存在与其他特征相互独立，基于数据属于某一类别的概率高低进行分类。
+    \end{enumerate}
+    \item 回归: Linear regression, Lasso regression, GLM, Gaussian Process, decision tree, random forests, gradient boosting
+    \begin{enumerate}
+        \item 线性回归：用于将连续响应变量描述(目标变量)为一个或者多个预测变量(特征)的线性函数
+        \item 非线形回归
+        \item 广义线性模型(generalized linear models)：使用将输入的线性组合拟合到输出的非线形函数上。
+    \end{enumerate}
+    \item 聚类: K-Means, hierarchical clustering层次聚类，DBSCAN密度聚类
+    \item Data size数据量
+    \begin{enumerate}
+        \item 小的数据集，选择简单的模型如逻辑回归或者支撑向量机
+        \item 大的数据集，选择复杂模型，如神经网络
+        \item 如果小的数据集选择大的模型，那么会导致模型对训练集过拟合，因为小的数据集，特征较少，大模型的参数量很多，足以表示小的数据集中普通样本每一个特征的关系，也可以表示一些特殊样本负样本的特征的关系，导致过拟合。一个大的数据集选择简单的模型，那么模型会欠拟合，因为模型难以拟合数据特征的关系。
+    \end{enumerate}
+    \item Feature type特征类型
+    \begin{enumerate}
+        \item 数值数据:线性模型或者树模型
+        \item 分类数据/混合数据:决策树，随机森林，梯度boosting模型
+    \end{enumerate}
+    \item 如果数据存在噪声或者缺失数据，则使用基于树的模型更加鲁棒
+    \item 如果可解释性(intepretability)重要，使用线性回归、决策树或者逻辑回归
+    \item 如果预测能力比可解释性重要，使用gradient boosting或者神经网络这些复杂的模型
+    \item Evaluate Performance and Complexity
+    \begin{enumerate}
+        \item 从简单的模型开始训练
+        \item 使用验证指标进行对比(RMSE，accuracy，F1)
+        \item 若性能不足，使用复杂的模型
+    \end{enumerate}
+    \item 实验与tune调优
+    \begin{enumerate}
+        \item 使用cross-validation 比较模型
+        \item hyperparameter tuning超参数调优(grid search，random search)
+    \end{enumerate}
+\end{itemize}
+\subsubsection{Model Deployment模型部署}
+将训练好的模型集成到生产环境中用于实际场景
+\subsubsection{Monitoring and Maintenance监控与维护}
+持续监控模型，在有新数据可用或者条件发生改变时对其进行更新
+
+\section{机器学习基础}
+
+\subsection{常见数据质量问题}
+\subsubsection{Missing data数据缺失}
+由于数据输入错误，设备故障或者未收集到的数值，一些特征是不完整的
+
+\subsubsection{Inconsistent or unstandardized Data不一致或者不标准化的数据}
+格式混杂，单位不一致，大小写不规范
+
+\subsubsection{Imbalanced data distribution不平衡的数据分布}
+一些模型占比过高，导致训练模型存在偏差
+\subsubsection{Outliers and noisy data异常值和噪声数据}
+干扰模型训练的极端值和错误值
+\subsubsection{Redundant or Collinear Feature冗余或者共线特征}
+重复和高度相关的特征会导致模型模型的不稳定性和过拟合。
+
+\subsection{数据预处理}
+\subsubsection{缺失值处理}
+\begin{itemize}
+    \item 填补或者移除缺失值
+    \item Mean/median/KNN imputation(属于数字内插方法：使用简单的算法快速填补数据空缺)；interpolation插值方法(牛顿插值，拉格朗日插值，赫米特插值，三次样条插值)
+\end{itemize}
+
+\subsubsection{Normalization和standardization}
+    移除尺度差异，加速模型收敛。
+    \begin{enumerate}
+        \item Normalization归一化(一般将数值缩放到0-1之间)
+        归一化常常用于有数值范围的数据，比如像素值(0-255),一般用于图像数据处理、神经网络
+        \begin{itemize}
+            \item Min-Max Scaling最小最大缩放
+            
+            $x^{'}=\frac{x-x_{min}}{x_{max}-x_{min}}$
+            
+        \end{itemize}
+        \item Standardize标准化(将数据标准化到均值为0，标准差为1)
+        标准化一般用于位置边界的数据，用于线性模型、SVM、逻辑回归等
+        \begin{itemize}
+            \item Z-score Normalization
+            
+            $x^{'}=\frac{x-\mu}{\sigma}$
+            $\mu$是特征的均值；$\sigma$是特征的标准差
+        \end{itemize}
+    \end{enumerate}
+
+\subsubsection{Discretization离散化}
+离散化将连续的数值变量通过分组他们的值到一个区间(bins)中来将连续的数值转换为离散的变量。
+
+如果模型或算法需要离散的输入或者希望减少连续数据中的噪声或者简化连续数据中的关系。
+
+\begin{itemize}
+    \item Equal-Width Binning等宽分箱
+    
+    将数据范围划分为宽度相等的区间, 公式为$Bin width=\frac{x_{max}-x_{min}}{k}$，k为分箱的数量。区间除了最后一个是左闭右闭，前面都是左闭右开。
+    \begin{enumerate}
+        \item 优点
+        
+        实现简单
+        \item 缺点
+        
+        如果数据分布不均，可鞥会导致空箱
+    \end{enumerate}
+    \item Clustering-based Binning聚类分箱
+    
+    使用聚类算法自动找到相似度高的箱。此方法是数据驱动的，能适应实际分布。
+    \begin{enumerate}
+        \item 优点
+        
+        自适应数据模式
+        \item 缺点
+        
+        计算复杂性高
+    \end{enumerate}
+    \item Equal-frequency Binning等频分箱
+    
+    每个箱的样本数量相同，区间宽度随数据分布调整。按照数据排序后，均分样本到每个箱
+
+    \begin{enumerate}
+        \item 优点
+        
+        适配偏态数据(也就是非正态分布数据，数据有右侧拖尾，如薪资、房价)，对于偏态数据中位数通常比平均值更能代表数据的典型水平，避免极端值导致的分布不均
+        \item 缺点
+        
+        每个箱的宽度不一样，边界无意义。
+    \end{enumerate}
+
+\end{itemize}
+
+\subsubsection{Feature Encoding特征编码}
+由于模型无法直接处理文本。特征编码将非数字的分类变量转换为数字形式的过程，以便机器学习算法能够对其进行处理。
+
+\begin{itemize}
+    \item label encoding标签编码
+    
+    每一个类别都被分配一个唯一的整数值。
+    \begin{enumerate}
+        \item 优点：
+        
+        简单，紧凑
+        \item 缺点：
+        
+        整数值之间的关系暗示了顺序关系(2>1>0),对nominal categories(名义类别：是无内在顺序、无大小/等级关系的分类变量)产生误导。
+
+        \item 适用对象：
+        
+        Tree model(决策树，XGboost)
+    \end{enumerate}
+    \item One-Hot encoding独热编码
+    
+    每个类别都表示一个二进制向量，只有一个元素为1，其余元素为0
+
+    适用模型：线性模型，神经网络
+\end{itemize}
+
+\subsubsection{Data Balancing数据平衡}
+在许多问题中，每个类别的样本数量是不均衡的。如果一个类别占主导地位，模型可能会忽略少数类别，从而在准确率上准确率较高，但对罕见事件招呼率很低。
+
+\begin{itemize}
+    \item oversampling过采样
+    \begin{enumerate}
+        \item 通过复制或者人工生成新样本来增加少数类样本的数量
+        \item SMOTE(Synthetic minority Oversampling Technique):通过在少数类样本之间进行插值来合成少数类别样本
+    \end{enumerate}
+    \item Undersampling欠采样
+    
+    减少多数类样本的数量，使其与少数类样本数量匹配。
+
+    简单且快速，但是可能会因丢失多数样本而丢失有价值的信息。
+    \begin{enumerate}
+        \item 优点
+        
+        能够保存所有数据集
+        \item 缺点
+        
+        合成样本与真实数据模式有偏差，过度学习少数类细节，导致模型过拟合，泛化能力下降
+    \end{enumerate}
+    \item class-Weight Adjustment类别权重调整
+    
+    不改变数据的数量，提高样本数量少的类别的误分惩罚。
+
+    公式：
+    $\omega_{i}=\frac{N}{k*N_{i}}$
+
+    i为类别，每一个i分配权重$\omega_{i}$。N是所有样本数量。$N_i$是第i类样本的数量。k是类别数量。
+
+    \begin{enumerate}
+        \item 优点
+        
+        能够保存所有数据集
+        \item 缺点
+        
+        需合理调整权重参数否则可能引入新偏差
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Feature selection/extraction特征选择和特征提取}
+减少维度，提升模型训练效率。移除不相关的冗余的特征。PCA主成分分析，LASSO岭回归，information gain信息增益
+
+\begin{itemize}
+    \item LASSO regression
+    
+    LASSO会将不重要的特征系数缩小到0，从而有效筛选关键特征。
+    \item Information gain
+    
+    衡量每个特征对预测目标的贡献程度。保留信息增益最高的特征。
+    \item Principal component analysis
+    
+    将现有特征转换或组合成新的特征。
+\end{itemize}
+
+\subsection{机器学习的3个基本组成部分}
+机器学习的目标是使计算机能够从数据中自动学习模式，而不是依赖于明确的编程规则。
+
+\subsubsection{Model模型}
+模型表示输入x和输出y之间假设的数学关系。定义了x到y的映射函数$f(x;\theta)$,$\theta$是模型待学习的参数，不同的模型意味着不同的假设空间。
+
+\begin{itemize}
+    \item 对于机器学习任务，我们首先要定义输入空间x，和输出空间y，不同的机器学习任务之间的主要区别是输出空间y的形式。
+    \begin{enumerate}
+        \item 对于binary classification(二分类问题)：$y=\{0,1\}$或者$y=\{-1,1\}$
+        \item 对于多分类问题(N分类问题)：$y=\{1,2,...,N\}$
+        \item 回归问题:$y=\mathbb{R} $
+        \item 输入空间x通常表示样本的特征空间
+        \item 可以表示为$p_r(y|x)$或者$y=g(x)$
+    \end{enumerate}
+    \item Linear Model线性模型
+    
+    线性模型假设输入x和输出y是线性关系的，其假设空间为参数化的线性函数族。
+
+    对于特征向量$x=[x_1,x_2,...,x_d]^T$和权重向量$w=[w_1,w_2,...,w_d]^T$，b是偏置,那么线性模型预测值可以写为如下公式：
+
+    $\hat{y}=w^Tx+b$
+
+    \item Nonlinear Models非线形模型
+    
+    $\hat{y}=f(x;\theta)$
+
+\end{itemize}
+
+\subsubsection{Learning Criterion学习准则/Objective Function目标函数/loss Function损失函数}
+目标函数定义了模型性能的好坏，衡量预测输出与真实输出之间的差异(discrepancy)。包括均方误差，交叉熵损失等。
+
+\begin{itemize}
+    \item Binary classification二元分类 
+    
+    二元分类问题，每个样本可以分为正类和负类。因此预测结果可以分成4种(第一位为模型是否预测正确，第二位为模型预测的结果)：
+    \begin{enumerate}
+        \item True positive(真阳性)：实际为正例，模型正确预测其为正例的结果。
+        \item False negative(假阴性)：实际为正例，模型错误预测其为负例的结果。
+        \item False positive(假阳性)：实际为负例，模型错误预测其为正例的结果。
+        \item True negative(真阴性)：实际为负例，模型正确预测其为负例的结果。
+    \end{enumerate}
+    \item confusion matrix混淆矩阵
+    \begin{enumerate}
+        \item Accuracy(准确率) 
+        准确率衡量所有样本中，被正确分类的样本所占的比例。$Accuracy=\frac{TP+TN}{TP+TN+FP+FN}$
+
+        但在数据不平衡时，效果较差。
+
+        \item Precision(精确率)
+        
+        精确率衡量的是预测为阳性的样本中，实际为阳性的比例。$Precision=\frac{TP}{TP+FP}$
+
+        高精度意味着当模型预测为阳性时，它通常是正确的。精确率侧重于减少假阳性。
+        \item Recall(召回率)
+        
+        召回率衡量的是模型正确识别出实际正样本所占的比例。$Recall=\frac{TP}{TP+FN}$
+
+        高召回率意味着模型成功捕捉到了大多数的阳性样本，召回率为了减少假阴性。
+
+        \item F1-score(F1分数)
+        
+        F1分数代表精确率和召回率达调和平均值，提供了一个平衡这两个指标的单一分数。$F1-score=2*\frac{Precision*Recall}{Precision+Recall}$
+    \end{enumerate}
+
+    \item K-Fold Cross-Validation(K折交叉验证)
+    \begin{enumerate}
+        \item K折交叉验证将数据集随机划分为k个大小相等的子集；在每一轮验证中选择一个子集作为测试集，其余k-1个子集作为训练集；此过程重复k次，确保每个子集都作为测试集使用1次；最后模型性能通过对所有k轮的结果取平均值评估。
+        \item 一般k=10
+    \end{enumerate}
+
+    \item 分类算法中的Training error(训练误差) and Generalization error(泛化误差)
+    \begin{enumerate}
+        \item 训练误差：模型对现有的数据集的拟合程度，衡量模型在已见过的数据上的表现。
+        \item 泛化误差：模型对新的未见过的数据进行正确分类的能力，衡量模型在训练集之外的泛化能力。
+    \end{enumerate}
+
+    \item Underfitting欠拟合 and Overfitting过拟合
+    \begin{enumerate}
+        \item 欠拟合：模型无法捕捉训练集数据的潜在模式。可以通过增加特征数量，选择更相关的特征以及使用更复杂的模型结果等方法来解决。
+        \item 过拟合：模型在训练数据上过于特化，在新的未见过的样本上表现不佳，导致训练误差持续下降，泛化误差开始上升。
+    \end{enumerate}
+
+\end{itemize}
+
+\subsubsection{Optimization algorithm优化算法}
+优化算法通过调整模型参数来最小化/最大化学习准则。包括：梯度下降，随机梯度下降，动量法，Adam，AdamW
+
+
+\section{Artificial Neural network(ANN)人工神经网络}
+
+\subsection{从Neurons(神经元)到Perceptrons(感知机)}
+
+感知机是线性二元分类器，常用于监督学习，要求样本是线性可分的。公式为:$y=f(\sum\limits_{i=0}^{n} w_{i}x_{i}+b)$
+
+x是输入向量，w是权重向量(突触)，b是bias(偏置)，f函数是activation function激活函数，Y是输出信号。
+
+\begin{itemize}
+    \item 输入值
+    \begin{enumerate}
+        \item 输入值是每个样本的features，样本在训练过程中按batch提供
+        \item 更大规模更多样化的输入特征通常会提升模型性能。
+    \end{enumerate}
+    \item Weights and Bias
+    \begin{enumerate}
+        \item 权重和偏置是可学习的参数。网络通在前向传播和反向传播的训练过程中，这两个参数会被调整以达到期望的值或输出。
+        \item 权重用于确定每个特征的重要性
+        \item 偏置使模型能够移动激活函数。
+    \end{enumerate}
+    \item weighted sum加权和
+    \begin{enumerate}
+        \item 将样本的各个特征与各自权重相乘，$z=\sum_{w_j}^{x_j}+b$,w是权重，x是输入特征
+        \item 它是激活函数的输入
+        \item 在训练过程中通过反向传播不断更新，来最小化损失。
+    \end{enumerate}
+    \item 激活函数activaton function
+    \begin{enumerate}
+        \item 使用step function阶跃函数：如果加权和结果大于0，就为1；如果小于0，就为0.
+    \end{enumerate}
+    \item 前向传播
+    
+    输入样本特征值，乘以权重，加权和，输入激活函数，得到输出信号
+
+    \item 反向传播
+    
+    损失函数对参数w和b进行求偏导以最小或最大化损失，使用偏导结果和学习率更新参数
+
+    \item 感知器的局限性
+    \begin{enumerate}
+        \item Single-layer structure单层架构
+        感知器是单层架构，只有一层权重。它完全依赖所提供的输入特征，没有能力发现或学习相关的中间表示。
+        \item No ability to handle Non-linearity没有能力处理非线性问题
+        感知器使用线性激活函数，它无法在学习过程中引入非线形。
+    \end{enumerate}
+
+    \item Multi-Layer Perceptron (MLP多层感知机)
+    
+    多层感知机具有多层结构，非线形激活函数和各种损失函数，能够处理复杂的非线形问题和多分类问题。
+\end{itemize}
+
+\subsection{Activation function激活函数}
+激活函数引入了非线性，使模型能够学习超越线性关系的复杂模式。
+
+\begin{itemize}
+    \item Sigmoid函数
+    \begin{enumerate}
+        \item sigmoid函数产生0到1之间的输出，适用于probabilistic interpretations.
+        \item $\sigma(x)=\frac{1}{1+e^{-x}}$
+    \end{enumerate}
+    \item tanh函数
+    \begin{enumerate}
+        \item tanh函数产生-1到1之间的输出，常被使用于中心化数据(也就是数据均值为0)。
+        \item $tanh(x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}$
+    \end{enumerate}
+    \item ReLU(Rectified Linear Unit整流线形单元)
+    \begin{enumerate}
+        \item 对负输入输出零，对正输入输出线性值。
+        \item $\operatorname{ReLU}(x) = \begin{cases} x, & \text{if } x > 0 \\ 0, & \text{otherwise} \end{cases}$
+        \item $\text{ReLU}(x) = \max(0, x)$
+    \end{enumerate}
+    \item Leaky ReLU
+    \begin{enumerate}
+        \item $\operatorname{ReLU}(x) = \begin{cases} x, & \text{if } x > 0 \\ 0.1x, & \text{otherwise} \end{cases}$
+        \item $\text{ReLU}(x) = \max(0.1x, x)$
+    \end{enumerate}
+    \item ELU
+    \begin{enumerate}
+        \item $\operatorname{ELU}(x) = \begin{cases} x, & \text{if } x \geqslant  0 \\ \alpha(e^{x}-1), & x<0 \end{cases}$
+    \end{enumerate}
+    \item Softmax
+    \begin{enumerate}
+        \item $Softmax(x)=\frac{e^{x}}{\sum\limits_{i}e^{x_{i}}}$
+    \end{enumerate}
+    \item GELU
+    \begin{enumerate}
+        \item $0.5x(1+tanh(\sqrt{\frac{2}{\pi}}(x+0.044715x^3)))$
+    \end{enumerate}
+    \item Maxout
+    \begin{enumerate}
+        \item $max(\omega^T_1x+b_1,\omega^T_2x+b_2)$
+    \end{enumerate}
+    \item 选择的激活函数与输出范围和目标值类型或该层的作用相关
+    \begin{enumerate}
+        \item 二元分类：Sigmoid函数
+        \item 多分类问题：Softmax函数，值域为0到1，结果和为1
+        \item 隐藏层：整数或者混合实数值，选择ReLU、Leaky ReLU，GELU
+        \item Recurrent neural network: 状态取值(-1,1),使用Tanh
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Loss function损失函数}
+损失函数是非负实值函数，用于量化模型预测与真实标签之间的差异。
+
+\begin{itemize}
+    \item 0-1 loss function
+    
+    0-1损失函数衡量预测是正确的还是错误的.$\operatorname{L}((y,\hat{y})) = \begin{cases} 0, & \text{if } \hat{y} = y \\ 1, & \hat{y}\neq y \end{cases}$
+
+    y是真实标签，$\hat{y}$是预测标签。
+    
+    \begin{enumerate}
+        \item 缺点
+        \begin{itemize}
+            \item Non-differentiable:损失不连续且导数为0，无法直接通过基于梯度的方法直接优化。
+            \item 无法直接反应模型对预测结果的置信度的高低。
+        \end{itemize}
+    \end{enumerate}
+
+    \item Cross-Entropy Loss Function交叉熵损失函数
+    
+    交叉熵损失衡量两个概率分布之间的差异，量化了预测概率分布与真实分布的匹配程度。
+    y是(一般通过独热向量编码)真实标签，$\hat{y}$是(通过sigmoid或者softmax)预测概率
+    \begin{enumerate}
+        \item binary cross-entropy二元交叉熵
+        
+        $L=$
+        \item categorical cross-entropy分类交叉熵
+    \end{enumerate}
+\end{itemize}
 
 \end{document}
