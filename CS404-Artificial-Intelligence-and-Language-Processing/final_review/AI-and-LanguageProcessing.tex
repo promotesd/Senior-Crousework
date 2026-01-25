@@ -574,11 +574,567 @@ x是输入向量，w是权重向量(突触)，b是bias(偏置)，f函数是activ
     交叉熵损失衡量两个概率分布之间的差异，量化了预测概率分布与真实分布的匹配程度。
     y是(一般通过独热向量编码)真实标签，$\hat{y}$是(通过sigmoid或者softmax)预测概率
     \begin{enumerate}
-        \item binary cross-entropy二元交叉熵
+        \item binary cross-entropy二元交叉熵/Logistic损失函数
         
-        $L=$
+        $L=-\frac{1}{N}\sum\limits_{i=1}^{N}[y_{i}log(\hat{y_{i}})+(1-y_{i})log(1-\hat{y_{i}})]$
+        \begin{enumerate}
+            \item $y_{i}是真实标签，y_{i}\in \{0,1\}$
+            \item $\hat{y_{i}}是预测概率，\hat{y_{i}}\in (0,1)$
+            \item 在sigmoid之后使用
+            \item Log损失是0-1损失的平滑近似，可以产生概率分布。
+        \end{enumerate}
         \item categorical cross-entropy分类交叉熵
+        
+        $L=-\frac{1}{N}\sum\limits_{i=1}^{N}\sum\limits_{c=1}^{C}y_{i,c}log(\hat{y_{i,c}})$
+        \begin{enumerate}
+            \item i是样本的索引，c是类别
+            \item $y_{i,c}$，如果c是正确的类别，则为1；否则为0
+            \item $\hat{y_{i,c}}$，表示第i个样本属于第c类的概率
+        \end{enumerate}
+    \end{enumerate}
+    \item Kullback-Leibler Divergence(KL散度)
+    
+    $Loss=\sum\limits_{i}P(x_{i})log(\frac{P(x_{i})}{Q(x_{i})})$
+
+    \item Hinge Loss(铰链损失函数)
+    
+    $Loss=max(0,1-\hat{y}y)$
+    \begin{enumerate}
+        \item 适用于支撑向量机模型
+        \item 不同类别中存在间隔，关注误分样本和边界样本
+    \end{enumerate}
+
+    \item Mean Square Error均方误差
+    
+    $MSE=\frac{1}{n}\sum\limits_{i=1}^{n}(y_{i}-\hat{y_{i}})^{2}$
+    \begin{enumerate}
+        \item 适用于回归任务
+        \item 计算目标值与预测值的平方平均值
+        \item 对异常值敏感
+    \end{enumerate}
+
+    \item Mean Absolute Error平均绝对误差
+    
+    $MAE=\frac{1}{n}\sum\limits_{i=1}^{n}|\hat{y_{i}}-y_{i}|$
+    \begin{enumerate}
+        \item 采用目标值与预测值的绝对差值，相比MSE对异常值鲁棒性更强。
+    \end{enumerate}
+
+    \item Root Mean Square Error均方根误差
+    
+    $MSE=\sqrt{\frac{1}{n}\sum\limits_{i=1}^{n}(y_{i}-\hat{y_{i}})^{2}}$
+    \begin{enumerate}
+        \item 适用于回归任务
+    \end{enumerate} 
+
+    \item Huber Loss
+    
+    $L_{\delta}(y, f(x)) = \begin{cases} \frac{1}{2}(y - f(x))^2, & |y - f(x)| \leq \delta \\ \delta|y - f(x)| - \frac{1}{2}\delta^2, & |y - f(x)| > \delta \end{cases}$
+    
+    \begin{enumerate}
+        \item 融合MAE和MSE的优势，小误差时使用二次函数损失，大误差使用线性函数损失
     \end{enumerate}
 \end{itemize}
+
+\section{Deep Neural Networks(DNN)深度神经网络}
+\subsection{深度神经网络}
+\begin{itemize}
+    \item 训练过程
+    \begin{enumerate}
+        \item 前向传播：计算模型输出和损失
+        \item 反向传播：计算计算模型梯度，使用链式法则更新模型参数。
+        
+        \begin{enumerate}
+            \item $\bigtriangleup w_{ji}=-\eta \frac{dE}{d w_{ji}}E$\end{enumerate}
+            \item 神经网络有很多参数，因此损失函数是一个由这些参数组成的多变量函数，我们要计算每个参数的偏导，以了解每个参数如何影响损失
+            \item 如果想知道每一层的参数如何影响损失，我们需要从最后一层输出层一步一步向前求每个参数的偏导数(占用大量计算资源)
+        \end{enumerate}
+        
+        
+        \item 参数更新：使用梯度和学习率自适应权重
+        \item 循环以上过程
+    
+    \item universal function approximation Theorem通用函数逼近定理
+    
+    给定任意连续函数f(x),如果一个2层的神经网络有足够的隐藏单元，那么存在一种权重选择，使其能够以任何期望的精度紧密逼近任何连续函数f(x)
+
+    \begin{enumerate}
+        \item 大量神经元会导致过拟合风险，需要一些早停或者正则化策略
+        \item Automatic differentiation自动微分
+    \end{enumerate}
+
+    \item Scaling laws缩放定律
+    \begin{enumerate}
+        \item Model size：更大的模型/更多的模型参数通常在任务上表现更好
+        \item Data Volume：使用更多的数据训练，通常会提高准确性
+        \item Computation计算能力：增加计算资源可以训练更深更大的网络
+    \end{enumerate}
+
+    \item 深度神经网络
+    
+    $z_{i}^{k}=g(\sum\limits_{j}W^{(k-1,k)_{i,j}}z^{(k-1)}_{j}+b^{(k)}_i)$
+    \begin{enumerate}
+        \item 第k层的第i个神经元等于连接第k-1层第j个神经元与第k层第i个神经元的权重乘以第k-1层的神经元输出之和加上偏置的数值，最后输入激活函数g
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Deep Learning深度学习}
+\subsubsection{Data preparation数据准备}‘
+数据被分为训练集，测试集和验证集。训练集用于模型训练。验证集一般用于超参数选择，测试集用于模型泛化能力测试。
+\begin{itemize}
+    \item Data Collection \& Quality
+    \begin{enumerate}
+        \item 确保你有足够多与你要解决问题相关的较高质量的数据
+    \end{enumerate}
+    \item Data preprocessing
+    \begin{enumerate}
+        \item 归一化/标准化：对数据进行标准化，确保模型更快更稳定地收敛
+        \item Data Augmentation数据增强：对于图像任务，可以通过transformation(比如：旋转，翻转，缩放)创建更多样的训练数据
+    \end{enumerate}
+    \item Handling Imbalanced Datasets
+    \begin{enumerate}
+        \item 考虑对少数类进行过采样，多数类进行欠采样，
+        \item 使用带权重的交叉熵损失，focal loss的相关的损失函数
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Model Design}
+\begin{itemize}
+    \item Architecture架构
+    \begin{enumerate}
+        \item 基于问题选择什么类型的模型(CNN适合图像数据训练；RNN和Transformer适合时序数据)
+        \item 选择层数以及层类型(convolutional卷积层, fully connection全连接层, recurrent循环层)
+        \item 越深的模型可以捕捉到越复杂的模式，但是很难训练
+    \end{enumerate}
+    \item Layer Sizes层大小
+    
+    层大小表示the number of neurons in each layer. 越多的神经元会提高模型能力，但对与小数据集会导致过拟合的风险。
+    \begin{enumerate}
+        \item Funnel Rule漏斗规则
+        
+        输入->large hidden size->smaller hidden size->output
+
+        \item 数据大小 VS 模型大小
+        
+        \begin{itemize}
+            \item 参数数量<10*样本数量
+            \item 使用regularization(dropout或者L2)正则化
+            \item 从简单的网络开始，向大网络扩展
+        \end{itemize}
+    \end{enumerate}
+
+    \item 激活函数
+    
+    影响模型学习非线形关系的方式。
+
+    \item 输出层和损失函数
+    
+    \begin{enumerate}
+        \item 根据任务选择输出层size。分类任务：softmax；回归：线形层
+        \item 损失函数：损失函数取决于具体任务。分类问题：交叉熵损失；回归：使用均方误差
+    \end{enumerate}
+
+    \item 机器学习中的Convergence
+    
+    收敛指训练过程中模型参数和损失函数值趋于稳定状态的过程。
+
+    \begin{enumerate}
+        \item 损失值随着迭代不断减小，参数更新变小。也就是模型学到了足够多的知识。
+    \end{enumerate}
+
+    \item 机器学习中的divergence
+    发散指训练过程没有朝着稳定改进的方向发展，而是训练过程变得不稳定
+    \begin{enumerate}
+        \item 训练损失没有下降反而上升了
+        \item 损失大幅度波动
+        \item 参数更新变化很大，且不稳定(overshooting超调)
+    \end{enumerate}
+
+\subsubsection{Training Process训练过程}
+
+\begin{itemize}
+    \item Optimizer优化器
+    
+    优化器通过调整模型的参数来最小化损失函数。比如SGD随机梯度下降，RMSprop，Adam等。
+
+    \begin{enumerate}
+        \item 训练的目标是通过优化器更新模型参数，最小化损失函数L.$\theta\leftarrow \theta-\eta \frac{dL}{d \theta}$
+        \item $\eta$是learning rate学习率 
+        \item $\frac{dL}{d \theta} $是损失函数对于参数的偏导数
+        \item 优化器类型
+        \begin{itemize}
+            \item Stochastic gradient descent(SGD随机梯度下降)
+            
+            \begin{enumerate}
+                \item 根据损失函数对参数的梯度更新权重
+                \item $w_{nex}=w_{old}-\eta \bigtriangledown L(w)$
+                \item $\eta$是学习率；$\bigtriangledown L(w)$是梯度
+            \end{enumerate}
+
+            \item Momentum动量法
+            
+            \begin{enumerate}
+                \item 使用上一步的梯度平滑权重更新并且可以预防收敛到局部最小值。
+                \item 为什么叫动量法，我们使用之前的速度的动量来冲过当下的局部极小值
+                \item $v_{t}=\beta v_{t-1}+(1-\beta)\bigtriangledown L(w)$,$w_{new}=w_{old}-\eta v_{t}$
+                \item 如果$\beta$小，那么当前的偏导对当前的梯度影响大；若$\beta$大，那么上一步梯度对当前的梯度影响大
+            \end{enumerate}
+
+            \item RMSprop(root mean square propagation均方根传播)
+            
+            \begin{enumerate}
+                \item $v_{t}=\beta v_{t-1}+(1-\beta) (\bigtriangledown L(w))^2$；
+                \item $w_{new}=w_{old}-\frac{\eta}{\sqrt{v_{t}+\epsilon }}\bigtriangledown L(w)$
+                \item 将学习率除以梯度的移动平均值。通过除以每一个参数的梯度，控制每一个参数的步长/学习率，如果一个参数上一步的更新梯度很大的话，容易导致更新不稳定，那么学习率除以$v_t$会导致学习率变小，避免更新补偿太大导致震荡。
+                \item 若梯度小，参数更新较慢，那么学习率除以梯度导致学习率变大，加速收敛。
+                \item 在计算梯度是加平方：消除方向的影响，关注参数更新的波动程度；在求梯度时减少计算量。
+                \item 可以处理梯度消失的问题
+            \end{enumerate}
+
+            \item  Adaptive Moment Estimation(Adam，自适应动量估计)
+            \begin{enumerate}
+                \item $m_{t}=\beta m_{t-1}+(1-\beta)\bigtriangledown L(w)$
+                \item $v_{t}=\beta v_{t-1}+(1-\beta)(\bigtriangledown L(w))^2$
+                \item Weight Update:$w_{new}=w_{old}-\eta\frac{m_{t}}{\sqrt{v_{t}+\epsilon}}$
+                \item 有RMSprop的优点和Momentum的优点
+            \end{enumerate}
+
+        \end{itemize}
+    \end{enumerate}
+    \item Learning rate学习率
+    
+    学习率控制优化器在梯度方向上的步长大小
+    \begin{enumerate}
+        \item 太高的学习率可能会阻碍收敛，过低的学习率导致训练缓慢
+        \item 可以使用学习率调度(步进衰减，指数衰减，余弦退火)或者自适应学习率
+    \end{enumerate}
+
+    \item Batch size批大小
+    
+    一个batch size表示每一次梯度更新训练的样本数量
+
+    \begin{enumerate}
+        \item 较小的batch size可以加快泛化速度，更好地适配新数据。因为小批量样本随机性强，导致每次更新参数时可能学习到更多新知识，帮助模型跳出局部最优，避免过度依赖训练数据细节。
+        \item 大batch size加快计算速度，且梯度更稳定。大批量中，GPU一次性处理多个样本，充分利用其并行计算能力；大量样本梯度平均后波动更小，不会频繁震荡。但是大样本会覆盖大多数的训练集，导致过拟合。
+    \end{enumerate}
+
+    \item Number of Epochs训练轮次
+    
+    一个训练轮次是使用训练数据集中所有样本进行一次训练的完整训练周期，可以包含多次batch size。
+
+    \begin{enumerate}
+        \item 如果epoch数量少，模型可能不能学习到数据中的潜在模式，导致欠拟合
+        \item 若epoch过大，模型可能会深究训练集的细节，导致过拟合，在未见过的新的数据集上泛化能力不佳。
+        \item 理想的epoch次数通过记录模型在每个epoch训练完之后在验证集上的性能来确定
+    \end{enumerate}
+
+    \item Regularization Techniques正则化技术
+    
+    正则化是用于减少神经网络过拟合的技术，dropout，L1正则，L2正则，批归一化。
+
+    \begin{enumerate}
+        \item Dropout:在训练过程中，每次前向传播时每个神经元按照一定概率(20\%-50\%)随机丢弃。减少有效神经元数量，同时反向传播时这些神经元值的梯度值也为0，不影响参数更新，可以防止过拟合。
+        \item L2正则(Weight Decay权重衰减):会在损失函数中添加一个惩罚项，抑制较大的权重值。$L_{total}=L_{original}+\lambda\sum\limits_{i}w_{i}^{2}$。$\lambda$是正则化因子。减小模型权重，让模型更平滑，在加权和中，权重减小，即使x有变化，输出y的波动也比较小。
+    \end{enumerate}
+
+    \item evaluation metrics评估指标
+    
+    选择合适的评估指标，accuracy,precision, recall, F1 score, AUC-ROC.
+
+    \begin{enumerate}
+        \item ROC Curve(Receiver Operating Characteristic Curve)
+        
+        \begin{enumerate}
+            \item Y轴：真阳性率True Positive Rate=TPR=Recall=$\frac{TP}{TP+FN}$
+            \item X轴：假阳性率False Positive Rate=FPR=$\frac{FP}{TP+TN}$
+            \item ROC曲线上的每一个点对应不同分类阈值的(假阳性率,真阳性率)。对于每一个阈值，求其真阳性率和假阳性率，若曲线在对角线之上，则模型效果可以。
+        \end{enumerate}
+
+        \item AUC(Area Under tne Curve)
+        
+        AUC量化了模型区分正类和负类的整体能力，曲线下面积越接近1，模型效果越好，越接近0.5模型效果越差
+    \end{enumerate}
+
+\end{itemize}
+
+\end{itemize}
+
+\section{Convolutional neural networks(CNN卷积神经网络)}
+
+\subsection{神经网络特征学习}
+\subsubsection{Hierarchical feature learning分层特征学习}
+\begin{enumerate}
+    \item 每一层都学习不同层次的特征
+    
+    \begin{itemize}
+        \item Shallow layers浅层(靠近输入)学习low-level patterns低级模式。（边缘，角点，颜色梯度）
+        \item Middle layers将简单的模式组合成更有意义的结构。（纹理和形状）
+        \item deep layer学习更高级的抽象特征。（物体部件）
+    \end{itemize}
+
+    \item 反向传播使网络能自动学习特征
+    \begin{itemize}
+        \item 网络做出预测
+        \item 将预测结果与真实标签进行比较，得到损失
+        \item 损失被反向传播，告诉每一层调整权重，使输出更接近真实情况
+        \item 每一层都会更新其参数，以检测能够减少损失的模式
+    \end{itemize}
+    
+    \item 传统全连接层在处理图像时面临的两个问题
+    \begin{enumerate}
+        \item 参数过多：对于100*100*3的图像，第一个隐藏层的每一个神经元都需要30000个独立连接。导致数据量大，且容易过拟合
+        \item lack of local invariance缺乏局部不变性：图像对象具有局部特征，这些特征在缩放旋转移位等操作下基本不变。若不进行大量数据增强，难以捕捉到这种不变性。
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{CNN}
+卷积神经网络是深度前馈神经网络，具有local connections局部连接，weight sharing权值共享，spatial invariance空间不变性。
+
+\begin{itemize}
+    \item 深度学习中卷积运算
+    \begin{enumerate}
+        \item 深度学习中卷积运算(torch库)直接进行滑动点积，不进行翻转(numpy库)。因为深度学习中参数是可学习的，不是固定的滤波器算子；省去翻转操作可以减少一次不必要的计算步骤。
+    \end{enumerate}
+    \item Padding填充
+    \begin{enumerate}
+        \item border effect边界效应：图像的中心像素会参与大量的卷积运算，图像的边缘位置参与卷积运算次数较少。比如中心位置的像素能被5*5的卷积在不同的卷积元素位置上覆盖，但是边缘像素只会覆盖一次。
+        \item 造成图像信息损失：边缘像素的特征无法充分参与卷积计算，导致输出特征图中边缘信息丢失
+        \item 图像尺寸变小：卷积后的特征图尺寸可能比输入小
+        \item 0-padding：在输入图像的外围补0，减轻边界效应，同时增加生成的特征图的空间维度
+    \end{enumerate}
+    \item Pooling Layer池化层
+    
+    卷积层之后是池化层。
+    \begin{enumerate}
+        \item 池化目标
+        \begin{itemize}
+            \item Spatial dimension reduction(减小空间维度)
+            
+            池化从过滤区域提取一个值来表示这个区域，因此会减小矩阵的大小，并降低网络计算复杂度。
+            \item Feature generalization(特征泛化)
+            
+            输入的微小变化和偏移将不会影响池化后的特征图，这是的网络对微小变化具有不变性。
+            \item Increased receptive field(增大感受野)
+            
+            感受野是CNN中某一层神经元能看到的原始输入图像的区域，若卷积核为3*3，那么感受野为图像中的3*3区域。再使用2*2的池化层，就会变成6*6的感受野。
+
+            通过对特定邻域像素窗口进行池化，网络能从更大区域捕捉模式，增大感受野。
+        \end{itemize}
+        \item MaxPooling最大池化
+        
+        最大池化选择每个池化窗口的最大值并且保留窗口中的主要特征。
+        \begin{itemize}
+            \item 帮助卷积神经网络关注最重要的模式
+            \item 让模型对噪声具有鲁棒性
+        \end{itemize}
+        \item AveragePooling平均池化
+        
+        平均池化选择每个池化窗口的平均值并且保持整体信息的平滑。
+        \begin{itemize}
+            \item 保留更多的背景信息
+            \item 当提取图像中像素强度分布时有用
+        \end{itemize}
+
+        \item 池化缺点
+        \begin{enumerate}
+            \item 池化会损失一些信息，尤其是一些较弱但是重要的特征(边缘/角点)
+            \item 池化是一种不可学习的操作。
+        \end{enumerate}
+    \end{enumerate}
+    \item stride步长(strided convolution)
+    
+    步长S>1会跳过输入中的某些位置，降低输出特征图的空间分辨率(下采样)。
+
+    优点：
+    \begin{enumerate}
+        \item 由于卷积是可学习的，虽然步长仍然是下采样，但是学习到了如何以最优方式进行下采样
+    \end{enumerate}
+
+\subsection{训练CNN}
+    \item 构建CNN网络
+    \begin{enumerate}
+        \item 输入，卷积，激活函数，最大池化，卷积，激活函数，最大池化，全连接层(线性层，激活函数，线性层)，全连接层，输出
+    \end{enumerate}
+\end{itemize}
+
+\section{natural language processing(NLP自然语言处理)介绍}
+
+\subsection{NLP概述}
+\begin{itemize}
+    \item NLP的定义：理解和生成人类语言的计算方法
+    \item 挑战：将语言的semantics(语义)和pragmatics(语用)融入计算机理解非常困难。
+    \begin{enumerate}
+        \item Ambiguity(语言歧义，相同语言不同语义)
+        \item Paraphrasing(释义相同语义的不同表达方式)
+        \item Socio-Linguistic Variation(社会语言变体：同一语言因使用场景、人群不通，在表达上存在差异)
+        \item Multi-Language and Code-Switching(多语言混合和缩写)
+    \end{enumerate}
+\end{itemize}
+
+\subsection{NLP Upstream tasks上游任务}
+
+上游任务是指为下游应用任务打基础的核心预处理任务，他们不直接解决实际业务问题，而是通过处理原始文本、提取基础语言特征，为后续复杂应用提供支撑。
+
+\subsubsection{Preprocessing Tasks:Tokenization分词 \& Sentence spliting分句}
+
+\begin{itemize}
+    \item Tokenization分词:将文本拆分为称为token的小单元。
+    \item N-grams:由n个连续单词组成的序列，用于捕捉局部语境并预测语言模式
+    \item 句子拆分：将文本分割成句子
+    \begin{enumerate}
+        \item 拆分的句子在句法上是完整的，并且代表完整的思想
+        \item 拆分的句子可以支持需要小文本单元的任务，比如机器翻译
+        \item 拆分的句子支持并行处理的任务。句子分割后，多个句子是相互独立的，可同时分配个多个计算核心进行处理。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Language Modeling(LM语言建模)}
+
+\begin{itemize}
+    \item 定义：基于前文已有的单词，预测序列中的下一个单词，以捕捉语言的架构和模式，理解语境。
+    \item 一个句子的概率，可以被定义为给定先前符号每一个符号概率的乘积。
+    \item 语言模型的类型：
+    \begin{enumerate}
+        \item Statistical Models统计模型：概率预测
+        \item Neural Models神经模型：深度学习模型(RNN，Transformer)
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Part of Speech(POS) Tagging词性标注}
+\begin{itemize}
+    \item 目标：由于词语存在歧义，因此要确定每个词的syntactic categories(语法类别:noun,verb...)，以及additional properties(附加属性：tense时态)
+    \item Annotated Corpus标注语料库：Pre-labeled data for training(用于训练的预标注数据)
+    \item 词句的特征:
+    \begin{enumerate}
+        \item 基本特征：suffix/prefix前后缀，sentence position句子位置，capitalization大写，punctuation标点 来确定当前词的词性
+        \item context window(上下文窗口)：融合相邻token的特征来决定当前词的词性
+        \item Previous POS Tags(先前词性标签)：将先前词语的词性预测结果当作特征辅助当前单词的词性判断
+    \end{enumerate}
+    \item 机器学习预测POS Tagging
+    \begin{enumerate}
+        \item 算法：逻辑回归，决策树，随机森林，支撑向量机
+        
+        将当前token，前一个token，后一个token的的特征映射到词性标签，每个词元单独分类。
+        \begin{enumerate}
+            \item 先对原始文本分局，再进行分词。标签编码：将词性标签变成整数索引，便于模型计算损失，构建成标签映射字典，训练后用于反向解码。模型输入单token特征向量(基础特征+语境窗口特征：当前词的特征向量=自身词形特征+前词的词形特征+后词词形特征)。经过模型，预测当个模型的词性标签概率分布，求损失。
+            \item 模型通过学习标注好的数据集中数据规律(比如：I会标注成PRP表示人称代词，like标注成VBP表示动词原形等)，建立特征组合与词性标签的对应关系。预测时，只依赖自身及前后词的特征，不考虑其他词的词性标签结果。
+        \end{enumerate}
+        \item word clustering单词聚类：将相似的单词分成k组以减小特征规模
+        \item sequence labeling序列标注：
+        \begin{enumerate}
+            \item Conditional Random Fields(CRF条件随机场)基于大概率出现的标签模式标注序列。CRF参考词性标签应有的合理排列规律来输出争端序列的标注结果。
+            \item 找到最大标签序列y$argmax_{y}p(y|x)$使整段序列一次性完成标注
+        \end{enumerate}
+    \end{enumerate}
+    \item Named Entity Recognition(NER命名实体识别)
+    
+    识别文本中的实体，并将其分类到预定义的类别中。
+
+    识别非结构化的文本中的关键信息来提供上下文和结构。
+
+
+    \item Coreference Resolution共指消解
+    
+    识别文本中指向同一实体的不同表达。
+
+    \item Word Sense Disambiguation词义消歧
+    
+    词义消歧指根据上下文语境，为文本中的多义词确定其在该场景下的唯一真实含义。
+
+    \item Semantic Role labeling
+    
+    语义角色标注/论元识别与标注指为句子中的核心谓语/动词等找出去关联的各类语义角色，并标注每个角色与谓词的语义关系。
+\end{itemize}
+
+\subsection{NLP 应用}
+
+\begin{itemize}
+    \item Text classification(TC)
+    
+    文本分类任务自动将文本分类成预定义的标签或主题。
+
+    \item Machine Translation(MT)
+    
+    机器翻译任务自动将文本从一门语言转为另一门语言。
+
+    方法
+    \begin{enumerate}
+        \item Rule-based:依赖于linguistic rule(语言规则)和grammar(语法)
+        \item Statistical:使用bilingual text corpora(双语语料库)进行概率预测。统计性概率翻译让模型从双语语料库中统计规律，统计语料中中文词或短语与英文词或短语的共现概率。统计语料中中文句子结构对应英文句子结构的转换概率。
+        \item Neural:使用深度学习模型
+    \end{enumerate}
+
+    \item Information Retrieval(IR)
+    
+    信息检索是基于用户的询问，在大数据库中发现相关信息的过程。
+
+    过程
+    \begin{enumerate}
+        \item Indexing索引：组织数据以快速访问
+        \item Query processing询问处理：解析用户输入以检索相关结果
+        \item Ranking：按照查询的相关程度排序结果
+    \end{enumerate}
+
+    方法
+    \begin{enumerate}
+        \item Boolean Retrieval：使用布尔运算符进行精确匹配
+        \item probabilistic Model:使用概率对文档进行排序 (BM2.5/TF-IDF)。不理解文本语义，仅从词频、文档长度、查询词重要性等表面特征计算查询词出现在相关文档中的概率，以此作为相关性评分。
+        \item 神经网络：采用深度学习根据相关性对结果进行排序。
+    \end{enumerate}
+
+
+
+    \item Question Answer
+    
+    问答系统用于自动回答自然语言提出的问题。
+
+    \begin{enumerate}
+        \item closed-domain(封闭领域)：在一个特定主题领域内回答问题
+        \item Open-domain(开放领域)：可以回答广泛主题的问题
+        \item Retrieval-based基于检索(extractive抽取式)：查找相关的文档或段落并且抽取答案
+        \item Generative Model生成式模型(abstractive)：使用神经网络模型直接从知识中生成答案。(神经网络通过大规模的训练参数，就是学习到的内化知识)
+    \end{enumerate}
+
+    \item Multi-Task Learning(MTL多任务学习)
+    
+    \begin{enumerate}
+        \item 多任务学习训练一个学习同时可以执行多个相关任务
+        \item 在任务之间共享知识，提升各种任务性能。
+    \end{enumerate}
+    \item Multi-Modal Learning(MML多模态学习)
+    \begin{enumerate}
+        \item 整合来自多个模态的数据，通过结合互补信息源提升模型的理解能力。
+    \end{enumerate}
+
+\end{itemize}
+
+\subsection{NLP的evaluation}
+\begin{itemize}
+    \item IR,TC,NER,POS等任务
+    \begin{enumerate}
+        \item Precision:所有检索到的item中，正确识别相关item所占的比例
+        \item Recall:在数据中所有相关的item中，正确识别出相关item的比例
+        \item F1 Score:精确率和召回率的Harmonic mean(调和平均数)
+        \begin{itemize}
+            \item Micro F1:对所有单个实例的精确值和召回率取平均值，不考虑类别大小，平等对待所有类别。
+            \item Macro F1:分别计算每一个类别的F1平均分数并取平均值，平等对待所有类别。
+        \end{itemize}
+        \item Accuracy:正确预测数与总预测数的比例，适用于平衡的数据集
+    \end{enumerate}
+
+    \item MT,TS,GT等
+    \begin{enumerate}
+        \item BLEU(Bilingual Evaluation Understudy双语评估替补):衡量生成的翻译和参考翻译中n元语法的重叠度。
+        \begin{itemize}
+            \item 计算：unigram。BLEU2要取1-gram和2-gram的几何平均。
+        \end{itemize}
+        \item ROUGH(Recall-Oriented Understudy for Gisting Evaluation面向召回的要点评估替补指标):评估生成的摘要与参考摘要之间的n元语法、单词序列或句子的重叠程度。
+        \begin{itemize}
+            \item 如果匹配的单词有6个，在1-gram中有4个出现在人工参考文本之间，那么Rough1为$\frac{2}{3}$
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\section{Word Representation词汇表征}
 
 \end{document}
