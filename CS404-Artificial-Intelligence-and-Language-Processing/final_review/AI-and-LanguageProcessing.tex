@@ -1137,4 +1137,406 @@ x是输入向量，w是权重向量(突触)，b是bias(偏置)，f函数是activ
 
 \section{Word Representation词汇表征}
 
+词表示是将一个单词转换为一个数值向量的形式以便于计算机可以理解，比较和处理它。
+
+\subsection{传统文档表示方法}
+\subsubsection{Bag of Words(BoW)词带模型的文本表示}
+\begin{itemize}
+    \item 流程
+    \begin{enumerate}
+        \item 将一个文档表示为向量：每一个文档由长度为n的向量组成，n是语料库中所有不重复的单词的总数。就是说语料库中的n个词是有索引的，我们构建和语料库长度一样的向量来表示一段话，如果哪一个索引上的词在语料库中出现，就在相关索引的值上填1或者加1。
+        \item 向量元素可以捕捉词信息：向量中的每一个元素对应词汇表中的特定词语，并包含该词语在文档中的数值信息。比如，若某个词的索引数字为5，说明这个词在词汇表中出现了5次。
+        \item Indicator指示器(0/1):这个向量中展示了词汇是否存在，若索引值为1则存在，为0则不存在
+        \item Term Frequency词频:展示单词在文档中出现的次数。
+    \end{enumerate}
+    \item 缺点
+    \begin{enumerate}
+        \item High dimension高维度:若词汇表中有上千上万单词，那么表示每一句话就会用上千上万个维度的向量进行表示，但是我们表示的词汇数量又较少，导致向量具有稀疏性且计算成本高。
+        \item No context and word order:忽略了句子中的词序，丢失了语境。
+    \end{enumerate}
+    \item 解决方法：Bag of n-gram：添加词对(bi-grams)以捕捉句子中的顺序，但是进一步增加了向量表示维度
+\end{itemize}
+
+\subsubsection{Sparse Word Representation稀疏词表示}
+\begin{itemize}
+    \item 流程
+    \begin{enumerate}
+        \item 语料库可以用一个矩阵进行表示，第一个维度是第几个文档，第二个维度是所有文档的词汇列表。矩阵中的值表示语料库中的词汇i在文档j中出现频率。这样，每个文档可以用词向量表示；语料库中的每个词也可以用每个文档出现频率向量进行表示。
+        \item 可以通过计算文档词向量之间的相似度来对文档进行比较
+        \item 可以通过计算词语文档的相似度来比较词语
+        \item 相似度使用cosine similarity余弦相似度$\frac{v_{1}v_{2}^{T}}{\left\lVert v_{1}\right\rVert \left\lVert v_{2}\right\rVert}$ 
+    \end{enumerate}
+    \item 问题
+    \begin{enumerate}
+        \item 由于词汇数量多和文档规模大，词汇文档的矩阵维度高且稀疏
+    \end{enumerate}
+
+    \item 解决方法(改进的稀疏词表示方法)
+    \begin{enumerate}
+        \item 使用Singular Value Decomposition(SVD奇异值分解)对高维稀疏矩阵进行降维，保留前k个奇异值
+        \item 用Latent Semantic Indexing(LSI潜在语义索引)将文档和单词表示为k维度的概念向量。
+        \item 生成紧凑密集的向量(word embedding词嵌入)
+        \item 使用余弦相似度计算词汇或文档见的相关性
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Word Embeddings:Word2Vec}
+
+词表征是将词表示为数字的通用概念。词嵌入式一种特定的词表征形式，使用密集的可学习的向量捕捉词语含义。
+
+\begin{itemize}
+    \item 通过使用语料库中local co-occurrence within small context windows(局部共现上下文小窗口)创建词嵌入，防止基于整个文档进行嵌入而丢失局部语义。
+    \item 神经网络方法
+    \begin{enumerate}
+        \item 连续词带模型CBOW:根据周围词汇预测中心词
+        \item Skip-Gram跳词:根据中心词预测周围词汇
+        \item 具备Flexible Embedding Size(灵活的嵌入维度)：可以选择嵌入N维
+        \item Setup设置:隐藏层数量，对称上下文窗口，负采样
+        \item 输出：学习的词参数作为词嵌入
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Continuous Bag of Words(CBOW)连续词带模型}
+
+聚合上下文词汇的词向量，并且使用组合向量预测中心词。
+
+\begin{itemize}
+    \item 流程
+    \begin{enumerate}
+        \item 输入层：
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Skip-Gram跳词模型}
+
+使用中心词向量预测其周围每个上下文词。
+
+
+\subsubsection{CBOW vs Skip-Gram}
+
+\begin{itemize}
+    \item CBOW 模型训练速度快，由于其对上下文词汇嵌入组合平均来预测中心词，因此在大数据集和高频次预测上非常有效。
+    \item Skip gram单独学习每一个上下文词汇，因此对于捕捉小数据集和罕见词之间的关系比较有效。
+\end{itemize}
+
+\subsubsection{GloVe(Global vector for word representation用于词表示的全局向量)}
+
+GloVe是一种无监督学习算法，通过利用语料库中的全局统计信息构建词嵌入。
+\begin{itemize}
+    \item Global Co-occurrence全局共现：分析语料库以捕捉词共现频率。
+    \item Co-occurrence Matrix共现矩阵：构建一个矩阵展示词对在上下文窗口中共同出现的频率
+    \item Optimization优化：利用基于共现率的cost function学习词嵌入编码语义关系。
+    \item 优势
+    \begin{enumerate}
+        \item Semantic capture语义捕捉：Embedding represent analogies and linear word relationships.向量表示语义类比和线性词汇关系。就是说，GLoVe生成的词嵌入能通过线性向量运算还原单词间的语义类比关系。比如国王-男生+女生的词嵌入会=女王
+        \item 利用全局数据进行高效训练。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{FastText}
+
+FastText将单词拆分为字符级子词，以跳词模型和连续词带模型为架构基础，引入了subword information。(apple->ap，pp,le)
+
+FastText将单词表示为n-gram字符集，使其能够捕捉单词的形态特征，为训练未见过的单词生成词嵌入。因为大多数单词能够拆分为子词的组合嘛。
+
+\subsection{Non-contextualized vs contextualized非上下文相关和上下文相关}
+
+\begin{itemize}
+    \item Non-contextualized word embedding非上下文相关单词表征
+    
+    \begin{enumerate}
+        \item 不考虑单词的上下文语境，为每个单词生成单一的静态的向量表征，比如Word2Vec，GLoVe，和FastText。
+        \item 这会在不同的语境下导致歧义。
+    \end{enumerate}
+
+    \item Contextualized word embedding上下文相关单词表征
+    \begin{enumerate}
+        \item 根据单词的上下文生成单词的不同表示(dynamic representation)。
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{ELMo}
+
+\begin{itemize}
+    \item ELMo通过周围的文本生成词的动态嵌入，以捕捉单词在不同语境下的微小差别(nuances)。
+    \item ELMo使用一个2层的深度双向长段时记忆模型LSTM网络，该网络在大型语料库上进行训练，并且以正向和反向上下文进行建模。
+\end{itemize}
+
+\subsubsection{BERT}
+
+\begin{itemize}
+    \item BERT模型使用Transformer中的encoder部分(多头注意力+残差+归一化+前馈网络+残差+归一化)。
+    \item BERT模型通过在大型语料库上进行预训练来学习通用的语言表示。
+\end{itemize}
+
+\section{Recurrent Neural Network(RNN循环神经网络)}
+
+循环神经网络通过引入记忆机制对序列进行建模并且捕捉时序依赖。一次处理一个元素，同时维持一个隐藏状态以捕捉来自先前元素的上下文。
+
+\subsection{标准RNN}
+
+\begin{itemize}
+    \item 流程：
+    \begin{enumerate}
+        \item 将句子进行分词并且做词嵌入
+        \item 对于每一个分词，从x1到xn
+        \item 在第一个时间步t=1,输入x1词嵌入，h0初始化全0
+        \begin{itemize}
+            \item 输入当前词汇的词嵌入，并且与前一时间步(h0)的隐藏状态进行拼接。
+            \item 拼接后输入RNN单元，并且经过tanh激活
+            \item 得到隐藏状态h1
+        \end{itemize}
+        \item 在第二个时间步t=2，输入x2词嵌入
+        \begin{itemize}
+            \item 将x2词嵌入与h1拼接后输入RNN，并且通过tanh激活，得到隐藏状态h2
+        \end{itemize}
+        \item 一直循环直到最后一个隐藏状态hn就是核心输出结果
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Long short-term Memory长短时记忆}
+
+标准的RNN由于梯度消失，难以处理长期依赖关系。梯度消失原因：由于RNN每次计算一个元素，在反向传播的过程中，随着连续的梯度相乘，导致梯度逐渐递减为0,导致梯度消失。
+
+LSTM 通过引入 specialized gates，这种门控机制通过使用sigmoid函数控制门的输入输出可以选择性地更新记忆：
+\begin{itemize}
+    \item Forget gate遗忘门: Decides what information to discard.决定什么信息要被丢弃/遗忘
+    \item Input gate输入门：Decides what new information to store决定哪些新的信息要被存储
+    \item Output gate输出门:Determines the next hidden state。确定下一个隐藏状态。
+\end{itemize}
+
+\begin{itemize}
+    \item Cell State and gates(细胞状态与门控)
+    
+    \begin{enumerate}
+        \item 细胞状态：信息沿着细胞状态传递，过程中仅发生很小的改变。细胞状态是LSTM的主要记忆通道，信息在传递过程中只通过门控做少量调整，比如丢弃无用信息，新增新信息。
+        \item LSTM中的门控：调控流向细胞状态的信息流。
+        \begin{itemize}
+            \item Pointwise multiplication 逐点乘法：过滤信息
+            \item Sigmoid层(输出0到1的数值)：控制通过量。若sigmoid值为0，说明什么都不通过；值为1，所有东西都通过
+        \end{itemize}
+        \item Forget Gate Layer遗忘门层
+        
+        遗忘门决定哪些信息要被丢弃
+        \begin{enumerate}
+            \item 将当前时间步的词嵌入输入，与前一时刻的隐藏状态输出，在最后一个维度进行拼接(就是说输入5*2，五个样本两个特征；隐藏状态也是5*2五个样本两个特征记忆，在最后维度拼接变成5*4)。
+            \item 乘以遗忘门权重加上遗忘门偏置得到每个样本的特征的遗忘分数，维度就是隐藏层维度也就是特征维度(5*2，每个样本每个特征的遗忘分数)。
+            \item 最后使用sigmoid激活函数计算遗忘概率，概率与前一状态的细胞状态相乘计算每个特征的遗忘后的值。
+            \item 公式$f_{t}=\sigma(W_{f}[h_{t-1},x_{t}]+b_{f})$
+        \end{enumerate}
+
+        \item Input Gate Layer输入门层
+        
+        决定在细胞状态中存入哪些新的信息
+
+        \begin{enumerate}
+            \item $i_{t}=\sigma(W_{i}[h_{t-1},x_{t}]+b_{i})$
+            \begin{itemize}
+                \item $i_{t}$决定当前新信息能存多少进细胞状态
+                \item 拼接前一状态隐藏维度和当前状态词嵌入输入，乘以新信息权重，加上偏置，乘以sigmoid得到概率。
+            \end{itemize}
+            \item $\tilde{C_{t}}=tanh(W_{C}[h_{t-1},x_{t}]+b_{C}) $
+            \begin{itemize}
+                \item 候选新信息，把要加入的新信息值压缩到(-1,1)之间，避免数值过大导致模型不稳定，同时让正向语义信息和负语义信息更明确。
+            \end{itemize}
+            \item 因此此时细胞状态为：$C_{t}=f_{t}C_{t-1}+i_{t}\tilde{C_{t}}$
+        \end{enumerate}
+        
+        \item Output Gate Layer输出们层
+        确定细胞状态和隐藏状态的输出
+        \begin{enumerate}
+            \item $o_{t}=\sigma(W_{o}[h_{t-1},x_{t}]+b_{o})$
+            \begin{itemize}
+                \item 输出门通过上一步隐藏状态与当前词嵌入的拼接后计算，通过学习输出权重，来得到输出要过滤的概率
+            \end{itemize}
+            \item $h_{t}=o_{t}tanh(C_{t})$
+            \begin{itemize}
+                \item 最后的隐藏层等于输出的权重乘当前细胞状态通过tanh和输出权重。最后ht不是Ct。Ct在输入门更新后就不动了，是长期记忆载体。ht是短时记忆。
+            \end{itemize}
+        \end{enumerate}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{LSTM Variants (LSTM变体)}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1.0\textwidth]{static/LSTM-variants.png}
+        \caption{LSTM-variants}
+        \label{LSTM-variants}
+    \end{figure}
+
+\subsection{LSTM优缺点}
+
+\begin{itemize}
+    \item 优点:通过门控机制和跨时间步共享参数，有效处理长期依赖关系
+    \item 缺点：只能顺序处理，效率低；难以处理极长序列，可扩展性有限。
+\end{itemize}
+
+
+\section{Transformer}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{static/Transformer.png}
+    \caption{Transformer}
+    \label{Transformer}
+\end{figure}
+
+\subsection{Transformer的框架介绍}
+Transformer包括encoder和decoder两个模块
+\begin{itemize}
+    \item Encoder编码器
+    
+    编码器能够使用多层自注意力和前馈神经网络并行处理输入序列，并生成输入的上下文表征。
+
+    \item Decoder解码器
+    
+    解码器使用masked self-attention掩膜自注意力, encoder-decoder attention编解码自注意力以及前馈神经网络逐步生成输出序列。
+
+    \item Input/output Embedding输入输出嵌入
+    
+    单词或者token被转换为密集向量
+
+    \item positional encoding位置编码
+    
+    Transformer不像RNN按照序列顺序一步一步计算隐藏状态。因此其没有固定序列顺序。通过将位置编码加到输入嵌入以保持词顺序。
+
+    \item Self-attention Mechanism自注意力机制
+    
+    自注意力机制能够使序列中的每一个词关注上下文中不同的词(包括距离较远的词)。
+
+    \item Multi-Head Attention多头注意力：
+    
+    多头注意力接受模型关注句子的不同部分，提升学习能力。
+
+    \item Residual Connections and Layer Normalization残差连接和层归一化
+    
+    让训练过程更稳定并且加速训练
+
+    \item Feed-Forward Network前馈神经网络
+    
+    注意力之后，使用全连接层处理数据
+
+\end{itemize}
+
+\subsection{Input/Output Embedding输入输出嵌入}
+
+输入输出嵌入是通过能够处理多种语言和未见过单词的tokenization(分词)的方法创建token多密集向量表征。
+
+在Transformer中输入输出嵌入是sharing(共享的).
+
+Tokenization Method
+\begin{itemize}
+    \item WordPiece:使用固定词汇表将生僻词拆分为子词。比如playing，词汇表中包含play和后缀\#\#ing,则将playing拆成这两个部分
+    \item Byte Pair Encoding(BPE字节对编码):将频繁出现的字符对进行合并。例子:有一个词库，通过计算每个字符和其他字符出现频率，来对共现字符组成的子词进行排序，选择共现频率高的子词加入语料库中，不断迭代直到达到语料库的最大数量或者其他阈值。
+    \item SentencePiece:对整段文本进行字符序列拆分，并且通过统计高频字符组合生成子词。例子：unhappiness, 对于词首un和happiness，拆分为\_\_un和happiness。这样忽略了空格。
+\end{itemize}
+
+\subsection{Position embedding位置编码}
+
+标准transformer使用正余弦函数表示每个token的位置信息，偶数使用正弦，奇数使用余弦。最后位置编码将会与token嵌入逐元素相加。有助于模型理解词语位置。
+
+$PE_{(pos,2i)}=sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}})$,$PE_{(pos,2i+1)}=cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}})$
+\begin{itemize}
+    \item pos表示序列中第几个token
+    \item i表示在嵌入向量中第几个维度
+    \item $d_{model}$表示嵌入向量大小,就是一个token用多少维度进行表示。10000是经验值，如果太大，频率减小，两个维度直接差距变大，无法捕捉到句子的远程依赖；如果太小，频率太快，两个维度是不是会比较相似？
+\end{itemize}
+
+\subsection{Scaled Dot-Product Attention缩放点积注意力}
+\begin{itemize}
+    \item 输入词嵌入和位置编码相加之后的结果(隐藏层的输入)
+    \item 使用$W^{Q}\in \mathbb{R} ^{d_{model}*d_{Q}}$,$W^{K}\in \mathbb{R} ^{d_{model}*d_{K}}$,$W^{V}\in \mathbb{R} ^{d_{model}*d_{V}}$,三个可学习的权重矩阵与隐藏层嵌入做矩阵乘积，得到QKV。Q是query询问，K是Key键，V是value值。
+    \item $Attention(Q,K,V)=softmax(\frac{QK^{T}}{\sqrt{d_{k}}})V$
+    \begin{enumerate}
+        \item 计算Q和K，用户查询和键之间的相似度
+        \item 在第一步初始化$W_{Q}$和$W_{K}$让权重的元素方差为$\frac{1}{d_{model}}$,X输入是均值为0方差为1，那么权重乘以X，均值为0，方差仍然为1，因为X的维度是$d_{model}$，所以方差求出来是$d_{model}*\frac{1}{d_{model}}$。所以Q，K，V均值为0，方差均为1。计算注意力分数时，$QK^{T}$求出来是token长度*token长度。但是每个元素是$d_k$维度向量的点积，因此注意力分数的方差为$d_k$。
+        \item 因此要除以$\sqrt{d_{k}}$
+        \item 使用softmax对注意力相似度进行归一化。
+        \item 最后乘以Value。根据计算出的注意力权重，从原始输入信息中提取并且组合出此token新的特征表示。
+    \end{enumerate}
+    \item 进行残差操作：X+新的特征表示
+    \item 进行归一化操作
+\end{itemize}
+
+\subsection{Multi-head Attention多头注意力}
+\begin{itemize}
+    \item 将一个缩放点积注意力分成8分，求得每一个token的8个新特征，最后拼接起来乘以权重，得到8个新特征融合成一个的特征。最后的特征要与原特征的维度相同，才能做残差操作。
+    \item 多头注意力允许模型并行关注序列的不同部分以捕捉各种类型的关系。
+    \item 多个注意力头独立计算注意力分数后将他们的结果进行拼接和变换
+    \item 此操作能够提升模型学习上下文和依赖关系的能力。
+    
+    \item 为什么缩放点积注意力和残差连接很重要
+    \begin{enumerate}
+        \item 没有缩放
+        \begin{itemize}
+            \item 当$d_{k}$很大时，点积后方差会变大
+            \item Softmax函数会出现饱和现象，导致梯度消失。比如：一个分数时100，一个是-100这样一个导致一些权重很大，一些权重很小，并且Softmax在饱和区的梯度几乎为0.
+            \item 缩放有助于：稳定训练；能够使用更深层更宽的网络
+        \end{itemize}
+        \item 没有残差
+        \begin{itemize}
+            \item 深度网络会有梯度消失或者梯度爆炸的问题
+            \item 原始输入信息将会在各层中衰减
+            \item 加入残差：保留输入信息；提供一条直接的梯度路径；让模型学习原始特征和加入注意力的特征的精细化内容。
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{normalization}
+
+\subsubsection{Layer Normalization层归一化}
+
+对单个样本的所有特征进行归一化。在自然语言处理中，也就是对单个token的词嵌入所有特征进行归一化。
+
+\begin{itemize}
+    \item 适用于序列数据训练
+    \item 在可变的批大小中更加稳定
+    \item Mean:$\mu=\frac{1}{n}\sum\limits_{i=1}^{n}x_{i}$
+    \item Variance:$\sigma^{2}=\frac{1}{n}\sum\limits_{i=1}^{n}(x_{i}-\mu)^{2}$
+    \item Normalized:$\hat{x_{i}}=\frac{x_{i}-\mu}{\sqrt{\sigma^{2}+\epsilon}} $
+\end{itemize}
+
+\subsubsection{Batch Normalization批归一化}
+
+对批量维度做归一化。就是说对这一批样本中，在同一特征维度下做归一化。如果有5个token，每个token有3维特征，就对所有token的第1维特征、所有token的第2维特征、所有token地第3维特征分别归一化。
+
+这里x表示的是每一个样本，因此每一个样本有多个维度
+\begin{itemize}
+    \item 减少批量样本内部的covariate shift(协变量偏移)，加快训练速度
+    \item 需要较大的batch size保证批归一化有效工作
+    \item Mean:$\mu=\frac{1}{m}\sum\limits_{i=1}^{m}x_{i}$
+    \item Variance:$\sigma^{2}=\frac{1}{m}\sum\limits_{i=1}^{m}(x_{i}-\mu)^{2}$
+    \item Normalized:$\hat{x_{i}}=\frac{x_{i}-\mu}{\sqrt{\sigma^{2}+\epsilon}} $
+\end{itemize}
+
+\subsection{Position-wise Feed-Forward Networks逐位置前馈网络}
+在前馈神经网络中包括一层线性变换+ReLU激活函数+一层线性变换.$FFN(x)=max(0,W_{1}x+b_{1})W_{2}+b_{2}$
+
+有助于引入非线形，并使模型在处理序列后学习复杂的模式。
+
+\subsection{Decoder解码器}
+
+\subsubsection{Masked Multi-Head Attention掩膜多头注意力}
+
+掩码多头注意力限制自注意力只能关注当前及之前的token，确保模型按照从左到右的因果(causal)顺序(autoregressive自回归)进行预测。
+
+\subsubsection{Encoder-decoder attention}
+
+编解码注意力使用前一层的解码器层输出的查询矩阵Q，和编码器层输出的键矩阵K和值矩阵V。这能让解码器在生成序列时，随时回看编码器处理后的输入上下文(比如翻译前的原文)，确保生成内容贴合输入语义。
+
+\subsection{Transformer的特点}
+
+\begin{itemize}
+    \item Parallelisation并行化
+    
+    与RNN模型相比，Transformer可以同时处理一整个序列，加速训练和推理
+    \item Long-Range Dependency长距离依赖
+    
+    自注意力捕捉一整个序列的关系，获取全局上下文。
+    \item Scalability可扩展性
+    
+    Transformer随着数据和模型规模的大小增加表现好。但是计算复杂性随着序列长度的增加成指数级增长。
+\end{itemize}
+
 \end{document}
