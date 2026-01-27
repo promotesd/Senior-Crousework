@@ -1539,4 +1539,449 @@ $PE_{(pos,2i)}=sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}})$,$PE_{(pos,2i+1)}=c
     Transformer随着数据和模型规模的大小增加表现好。但是计算复杂性随着序列长度的增加成指数级增长。
 \end{itemize}
 
+
+\section{Transformer-based Language Models}
+
+Transfer Learning迁移学习:迁移学习是现在数据丰富的任务上预训练模型，再将学到的通用特征迁移到下游特定任务。
+
+\subsection{Bidirectional Encoder Representations from Transformers(BERT/transformer的双向编码器表征)}
+
+\begin{itemize}
+    \item 关键特征
+    \begin{enumerate}
+        \item Pre-trained on large corpora(语料库),(Wikipedia,bookcorpus)
+        \item 预训练的目标(半监督训练)
+        \begin{itemize}
+            \item Masked language model(MLM掩码语言模型)
+            \begin{enumerate}
+                \item 随机掩码输入中的一些token
+                \item 模型基于双向上下文学习预测被掩码的token
+            \end{enumerate}
+            \item Next Sentence Prediction(NSP)
+            \begin{enumerate}
+                \item 预测是否两个句子在文本中是否连续
+            \end{enumerate}
+        \end{itemize}
+        \item Fine-tuned(微调) for various NLP task(监督训练)
+        \begin{enumerate}
+            \item 在下游任务上微调模型，文本分类，命名实体识别，问答
+        \end{enumerate}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Generative Pre-Training(GPT)生成式预训练}
+\subsubsection{GPT-1}
+\begin{itemize}
+    \item GPT1是生成式的基于Transformer解码器架构的模型，是先进行无监督训练后进行有监督微调的过程。
+    \item 通过序列中的下一个单词(causal language modeling(CLM因果语言建模))建模自然语言。
+\end{itemize}
+
+\subsubsection{GPT-2}
+\begin{itemize}
+    \item 与GPT1架构相似，但是参数规模增加并且在更大的数据集(WebText)上训练
+    \item 引入了 probabilistic form for multi-tasking(多任务处理的概率形式)
+    \begin{enumerate}
+        \item P(output|input,task):基于输入和任务信息预测输出
+        \item 用自然语言文本统一输入和输出，让模型能以文本交互的方式解决各类问题，无需为不同任务设计专属架构
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{GPT3}
+\begin{itemize}
+    \item 证明了扩大神经网络规模能显著提升模型能力
+    \item In-context Learning(ICL上下文学习)
+    \begin{enumerate}
+        \item 引入了以少样本和无样本形式执行任务的能力。
+        \item 用自然语言文本教模型做任务，让预训练和实际使用遵循同一个文本交互范式。之前不同的任务需要使用不同的输出头。
+        \item 给定任务描述和示例(提示词prompt)，将任务的解决方案预测为文本序列。之前都是生成那种标签而非任务答案。
+        \item 标志着从预训练大模型转向大语言模型的重要一步。
+    \end{enumerate}
+\end{itemize}
+
+\begin{itemize}
+    \item GPT预训练
+    
+    给定序列token:x1,x2,...,xT.最大化似然$P(x1,x2,..,xT)=\prod \limits_{t=1}^{T}P(x_{t}|x1,x2,...,x_{t-1})$
+    \item GPT微调
+    
+    在GPT2之前，输入是文本和位置编码，依次经过掩码多头注意力，残差连接，层归一化，前馈神经网络，残差连接，层归一化，输入多个任务头。
+    \begin{enumerate}
+        \item Classification分类任务：start(任务开始)+text(待分类文本)+extract(标识输出结果)，进transformer后输入线性层
+        \item Entailment(蕴含：前提是否蕴含假设):Start+Premise(前提)+Delim(分隔符)+Hypothesis(假设)+Extract，进Transformer输出linear
+    \end{enumerate}
+
+    为特定任务格式化输入-输出对
+\end{itemize}
+
+\subsection{T5}
+\begin{itemize}
+    \item T5是基于编码器解码器架构
+    \item 所有的NLP任务都可以背理解为text-to-text问题
+    \item Span Corruption(跨度毁坏)：在预训练时随机删除文本里的连续片段(span)，让模型预测这些被删除的内容。删除内容的token用<mask>进行替换。
+\end{itemize}
+
+\subsection{其他模型}
+\begin{itemize}
+    \item DistilBERT
+    \item XLNet
+    \item DeBERTa
+    \item Transformer-XL
+    \item ERNIE
+    \item BART
+\end{itemize}
+
+\subsection{Large language model大语言模型LLM}
+
+Scale:模型拥有十亿或者数万亿的参数
+
+In-context Learning：无需微调，使用少样本和零样本对任务进行适配。(这里的意思是我们之前在做任务是要先进行下游任务的微调，但是LLM的预训练足以让大语言模型拥有较好的零样本和少样本能力)
+
+Emergent ability涌现能力:展现出小模型所不具备的推理能力，创造力和域适应能力
+
+\begin{itemize}
+    \item Pre-training
+    
+    从大量为标注的数据中学习一般语言模式
+
+    \item Post-training(Fine tuning)
+    
+    使模型对其人类的意图，使模型适应对应任务
+\end{itemize}
+
+\begin{enumerate}
+    \item 现有大语言模型
+    \begin{itemize}
+        \item LLAMA
+        \item Claude
+        \item ChatGPT:对话数据集上进行微调，使模型具备多轮交互的能力；使用reinforcement learning from human feedback(RLHF)
+        \item Gemini
+        \item Grok
+        \item Deepseek
+        \item Qwen
+        \item Doubao
+    \end{itemize}
+    \item Scaling LLMs的挑战
+    \begin{itemize}
+        \item Model size and computational cost：大型模型需要更高性能的GPU，导致计算成本昂贵。
+        \item Energy consumption：训练大模型消耗大量电力
+        \item Latency and real-time usage：大模型往往难以获得实时的结果，对于许多在边缘设备的应用至关重要
+    \end{itemize}
+    \item 高效人工智能优化策略
+    \begin{enumerate}
+        \item Quantization量化：降低模型参数的数值精度来节省内存占用，加快计算速度。
+        \item Knowledge Distillation知识蒸馏：训练更小的学生模型来模仿更大的教师模型的行为，在降低模型复杂度的情况下实现相近的性能。
+        \item Model Compression模型压缩：在保持模型有效的同时，通过剪枝(pruning)或权重共享(weight-sharing)减小模型规模
+        \item Efficient Architectures高效架构：Mixture of Expert(MoE专家混合模型),sparsity.
+    \end{enumerate}
+    \item Mixture of Expert(MoE)
+    
+    将前馈网络层拆分为多个并行的专家，在保证模型计算不变的情况下扩展模型能力
+
+    \begin{enumerate}
+        \item 专家混合模型是一种稀疏的大语言模型架构，包含许多专家子网络。
+        \item MoE架构中，路由模块会为每个输入token选择top-k个最匹配的专家，因此每个token仅激活一小部分专家。
+        \item 每个专家有不同的专长
+        \item 专家混合模型在不增加计算量的前提下扩展模型能力
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{未来发展方向}
+\begin{itemize}
+    \item Inference-time reasoning(CoT,planning,reflection)
+    \item Tool and retrieval-augmented models(RAG，MCP)
+    \item Agentic AI:models that act, verify and adapt
+\end{itemize}
+
+\section{Reasoning and Agentic LLMs}
+
+模型的多步推理和任务分解能力由思维链等其他技术实现。
+
+\subsection{Chain of thought (CoT思维链)}
+
+
+\begin{itemize}
+    \item 思维链是一种提示技术，引导模型在生成最终答案之前对问题一步一步思考。它帮助模型在不借助外部工具的情况下进行模型内步推理。
+    \item Variants of CoT
+    \begin{enumerate}
+        \item Zero-shot CoT(零样本思维链):无示例提示
+        \item Few-shot CoT(少样本思维链):提供少量带完整推理步骤的示例
+        \item Self-consistency(自一致性):对多个思维链进行采样并且汇总结果，通过投票输出最优解
+        \item Hidden CoT(隐藏思维链):内部推理，输出最终答案
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Tree of Thought(ToT思维树)}
+
+Reasoning=在思维空间中进行搜索
+
+\begin{itemize}
+    \item 思维树会让模型探索多个候选思路，对其进行评估，并选择或扩展最佳思路。
+    \item 流程:
+    \begin{enumerate}
+        \item Thought Generation思维生成：生成下一个步骤的多个候选思维
+        \item Thought Evaluation思维评估：对partial solution(部分解)进行打分，一般使用self-evaluation自评估(模型自己推断候选解法是否可行，是否产生矛盾等),heuristic启发式评估(用简单规则快速打分。比如条件是否满足约束，或者数学公式是否正确),verifier外部验证器(调用专门的工具进行验证。比如使用计算器验证计算中间过程。)
+    \end{enumerate}
+\end{itemize}
+
+\subsection{ReAct=Reason+Act}
+
+
+ReAct是大模型推理和行动的主流框架之一。指导智能体如何分步调用工具。这个框架规定智能体可以通过Thought->Action->Observation进行循环迭代。
+
+比如说，我现在要知道明天要买什么衣服，模型会思考我要做什么，然后行动比如打开天气软件，查看天气之类的；再思考一步打开淘宝，它帮你搜索淘宝找衣服，然后给你链接。而不是简单地进行推理。
+\subsection{Agentic LLM具备代理能力的大语言模型}
+
+\begin{itemize}
+    \item Agent(智能体)是一个利用人工智能模型与环境交互以实现用户定义目标的系统。通过结合reason，planning和the execution of action 来完成任务。
+    \item Agentic LLMs(智能体化大语言模型)是一个使用大语言模型作为核心推理引擎的系统
+    \begin{enumerate}
+        \item 能够理解自然语言：以有意义的方式解读并相应人类指令
+        \item reason and plan:分析信息，做决定并且制定解决问题的策略
+        \item 与环境interact：收集信息，采取行动，观察行动结果
+    \end{enumerate}
+    \item Thought action Observation:think plan act observe
+\end{itemize}
+
+
+\subsection{Model Context Protocol(MCP模型上下文协议)}
+
+MCP是一个将人工智能应用程序连接到外部工具的standardized协议。
+
+\begin{itemize}
+    \item MCP主要是客户端-服务器模式
+    \item MCP client向服务器发起请求，负责调用工具，查询资源，插入提示词
+    \item MCP server提供服务，暴露工具、资源和提示词模版
+    \item 支持本地连接和远程部署
+    \item Tool(模型控制):模型可直接调用的函数，用于执行操作。检索，更新数据库
+    \item Resource(应用控制):提供应用的数据。文件，数据库
+    \item prompts(用户定义):预定义的交互模版，规范AI输出与交互格式。文档问答
+    \item 安全问题：
+    \begin{enumerate}
+        \item 智能体不仅生成内容，而且采取实际行动，可能引发实际危害
+        \item 智能体优化目标与实际用户需求不一致，导致错误或无效结果
+        \item 智能体滥用工具或越权使用工具
+        \item 智能体基于错误假设(幻觉信息)采取行动
+    \end{enumerate}
+    \item 解决方案：
+    \begin{enumerate}
+        \item Human-in-the-loop approval for critical action:重要操作需人类确认后再操作，避免智能体自主触发高风险行为
+        \item Tool sandbox and least privilege:限制智能体调用工具的权限范围，把工具操作隔离在安全环境中，防止滥用
+        \item Explicit stop time and cost
+        \item External verification
+        \item Logging, traceability, and replay
+    \end{enumerate}
+\end{itemize}
+
+
+\section{Reinforcement learning强化学习}
+
+\subsection{强化学习框架}
+
+\begin{itemize}
+    \item 强化学习是一种解决控制问题的框架，它通过构建智能体来实现，这些智能体通过trails and errors(试错)与环境进行交互并且receiving rewards作为唯一反馈来从环境中学习。
+    \begin{enumerate}
+        \item Agent interaction智能体交互:人工智能体通过与环境交互进行学习
+        \item Trail and error试错：通过行动和输出结果实现学习
+        \item Reward feedback奖励反馈：接收正面和负面的奖励作为行为的反馈
+        \item Natural Inspiration自然启发：模仿人类和动物通过交互的方式进行学习
+        \item Goal目标：学习如何采取行动以最大化累计奖励，一条动作链的累积奖励被称为期望奖励(expected return)。每一步的即时奖励被称为reward。
+    \end{enumerate}
+    \item 强化学习主要变量：state，action，reward，next state
+\end{itemize}
+
+\subsection{强化学习的概念}
+
+\begin{itemize}
+    \item Observation and state(观测与状态)
+    
+    Observation和state是智能体从环境中获取的信息。
+    \begin{enumerate}
+        \item State：状态是对环境的完整描述，包含所有后续发展的关键信息，不存在任何隐藏信息。
+        \item Observation：由于环境中含有隐藏信息，观测是智能体从环境中获取的部分信息。比如环境中含有敌人的下一步动作这种随机信息，难以预测。
+    \end{enumerate}
+
+    \item Action space动作空间
+    
+    动作空间是环境中所有可能动作的集合。
+
+    \begin{enumerate}
+        \item discrete action space离散动作空间：动作是有限的
+        \item Continuous action space连续动作空间：可能的动作数量是无限的
+    \end{enumerate}
+
+    \item Types of RL tasks
+    
+    \begin{enumerate}
+        \item Episodic task:有明确开始和结束状态的任务。
+        \item Continuous task：没有终止状态且无限期运行直到人手动停止的任务。
+    \end{enumerate}
+
+    \item exploration探索 vs exploitation利用
+    
+    \begin{enumerate}
+        \item exploration:尝试不同的动作发现潜在的更高的奖励
+        \item exploitation：利用已知的信息最大化即时奖励
+    \end{enumerate}
+
+    \item Markov Decision Process(马尔可夫决策过程)
+    \begin{enumerate}
+        \item 智能体仅仅通过当前的状态来决定要执行什么动作，不需要历史的状态和动作。
+        \item Policy策略$\pi$是从状态S映射到动作A的函数，这函数指定了在什么状态下采取什么动作。
+        \item 目标是最大化accumulative discounted reward(累计折扣奖励)发现最优策略$\pi^{*}$
+        \item $R(\tau )=\sum\limits_{t>0}\gamma ^{t}r_{t}$。$\tau$是状态动作序列；$\gamma$是折扣率，通常为0.95到0.99之间，如果折扣率设置很小那么奖励主要由前几个动作和状态决定，因为随着步数t的增大，之后步数的奖励会逐渐减小； $r_{t}$即时奖励
+    \end{enumerate}
+
+    \item reward function奖励方程一些问题
+    \begin{enumerate}
+        \item 将奖励与目标对齐：确保奖励准确反映期望结果
+        \item 避免Award hacking(奖励欺骗)：防止智能体利用loopholes(漏洞)以非预期的方式最大化奖励
+        \item 平衡immediate reward and long-term rewards(即时奖励和长期奖励):确保智能体重视长期成功而非较高的即时奖励
+        \item 处理复杂和多任务目标：设计能够涵盖任务所有方面且无冲突的奖励机制
+        \item 扩展性与自适应性：创建函数与环境变得更复杂时仍能运行良好的奖励函数
+    \end{enumerate}
+
+    \item Delayed reward(延迟奖励)
+    
+    当智能体没有通过它的行为获得即时奖励，且其结果只有在一系列后续行为和时间步之后才会released，就会出现延迟奖励。
+
+    \begin{enumerate}
+        \item 智能体需要学会将其行为与未来关系联系起来，这通常需要跨越较长的时间范围，使得学习变得复杂且不够直接
+        \item 通过exploration(随机选择动作执行)和exploitation(选择已知能够产生奖励的动作)
+    \end{enumerate}
+
+    \item 寻找最优策略的方法
+    
+    \begin{enumerate}
+        \item Policy-based methods
+        
+        Direct learning直接学习：教智能体直接通过当前状态选择动作
+        \item Value-based methods
+        
+        Indirect learning间接学习：训练智能体通过评估状态的价值并且选择能够导向更高价值状态的行为。
+    \end{enumerate}
+
+    \item Value/return vs Reward
+    
+    \begin{enumerate}
+        \item 状态或者状态动作对的价值表示expected accumulated reward。是智能体从该状态或者状态动作对开始，遵循自身策略不断行动获得的预期累计奖励。
+        \item 奖励是智能体在特定状态下执行动作后从环境中获得的即时奖励。
+    \end{enumerate}
+
+    \item Policy-based method基于策略的方法
+    
+    策略函数是直接学习得到的，定义了每一个状态到最佳动作的映射
+
+    \begin{enumerate}
+        \item Deterministic Policy确定性策略
+        
+        对于给定的状态，都有唯一确定执行的动作
+        \item Stochastic Policy随机策略
+        
+        为每个状态提供动作概率分布。比如说一个状态，执行动作1的概率是30\%，执行动作2的概率是70\%.
+
+        $\pi(a|s)=P(A|s)$
+    \end{enumerate}
+
+    \item Value-based method基于价值的方法
+    
+    学习一个策略函数，该函数将一个状态映射为处于该状态的期望价值。
+
+    状态的价值指智能体从该状态出发并遵循策略所能获得的expected discounted return(期望折扣累计回报)。通过找到策略，以发现价值最高的状态。
+
+    \item Off-policy离线策略 vs Online-policy在线策略
+    \begin{enumerate}
+        \item Off-Policy:The acting policy和updating policy不同。(Q-Learning)。就是说，Q学习中，智能体做动作是根据$\varepsilon$贪心规则，不断探索和利用；而它更新是根据动作策略收集到的经验，选择贪心算法得到最优策略。
+        \item On-Policy:动作策略和更新策略相同。
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{Deep Reinforcement Learning深度强化学习}
+
+深度强化学习引入深度神经网络来解决强化学习问题
+
+\begin{itemize}
+    \item 两种基于价值算法
+    \begin{enumerate}
+        \item Q-Learning(传统强化学习)
+        \begin{itemize}
+            \item 使用Q表存储每个状态的动作价值
+            \item 基于表中的Q值进行每个状态的动作选择
+        \end{itemize}
+        \item Deep Q-Learning(DRL)
+        \begin{itemize}
+            \item 使用神经网络替换Q表来近似Q值
+            \item 神经网络在大的连续的状态空间中具备更好的泛化性
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Q-learning}
+\begin{itemize}
+    \item Q学习是一种离线策略基于价值的方法，它使用时间差分(temporal difference)方法训练动作-价值函数。
+    \item Q函数是状态-动作价值函数，决定了处于特定状态下采取特定动作的价值，这个价值也被称为Q-value。
+    \item 目标：找到最优的Q函数，来得到最优策略
+    \item $\pi^{*}(s)=argmaxQ^{*}(s,a)$
+    \item 使用Q表，记录当前状态做所有动作的Q值（state-action pair values）
+    \item 算法流程
+    \begin{enumerate}
+        \item 初始化Q表为0，行数为状态个数，列数为动作个数
+        \item 适用$\varepsilon $greedy policy选择一个动作。以$\varepsilon $的概率执行exploration(随机选择动作)，以$1-\varepsilon $概率执行exploitation(选择一个贪心动作)。
+        \item 训练初期$\varepsilon $较大，模型探索概率高，目的是多尝试、收集环境信息；训练后期$\varepsilon $减小，模型倾向于选择最优策略。
+        \item 更新状态价值函数：$V(S_{t})\leftarrow V(S_{t})+\alpha[R_{t+1}+\gamma V(S_{t+1})-V(S_{t})]$. $V(S_{t})$是当前状态的价值，$\alpha$是学习率，$R_{t+1}$是当前状态执行动作之后的即时奖励，$\gamma V(S_{t+1})$是下一状态的折扣价值(约等于累计期望价值)
+        \item 更新动作价值函数：$Q(S_{t},A_{t})\leftarrow Q(S_{t},A_{t})+\alpha [R_{t+1}+\gamma max_{a}Q(S_{t+1},a)-Q(S_{t},A_{t})]$。$max_{a}Q(S_{t+1},a)$表示在下一状态$S_{t+1}$的所有可能动作a中选择能让Q值(长期收益期望)最大的动作，
+    \end{enumerate}
+    \item 缺点
+    \begin{enumerate}
+        \item 可扩展性差：在小型的状态空间中表现良好，但在复杂环境中变小不佳
+    \end{enumerate}
+    \item 优化
+    \begin{enumerate}
+        \item 用可学习的参数化的Q函数替换Q表
+        \item 使用神经网络来近似给定状态下每个动作的Q值，也被称为DQL。
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Deep Q-learning}
+深度Q学习使用神经网络对每个状态下每个动作Q值的近似计算。
+
+\begin{itemize}
+    \item 在视觉任务下的DQL中，通过对图像帧的堆叠提供时序信息。并且对图片进行降维和灰度化来减小计算量。
+    \item 训练流程:
+    \begin{enumerate}
+        \item 采样：执行动作并且将经验元组存储在replay memory中，经验元组有(状态，动作，奖励，下一状态)
+        \item 训练：随机采样一批元组，并使用梯度下降法进行学习。
+        \item Q-target: $y_{j}=r_{j}+\gamma max_{a^{'}}\hat{Q}(\phi_{j+1} ,a^{'};\theta^{-}) $计算即时奖励和加权估计最优Q值。
+        \item Q-loss: $Loss=y_{j}-Q(\phi_{j},a_{j};\theta)$,通过最小化当前Q网络预测值与目标值$y_{j}$之间的(均方)误差，使Q网络逐渐满足贝尔曼最优方程。
+    \end{enumerate}
+    \item 深度Q学习不稳定性：
+    \begin{enumerate}
+        \item 由于结合基于神经网络的非线形Q值函数
+        \item 使用估计值更新目标值(bootstrapping)
+    \end{enumerate}
+    \item 解决方法
+    \begin{enumerate}
+        \item Experience replay(经验回放)
+        \begin{itemize}
+            \item 在回放缓存中存储和回放经验
+            \item 从相同的经验中多次学习
+            \item 避免catastrophic forgetting
+            \item 打破连续经验之间的相关性
+        \end{itemize}
+        \item Fixed Q-Target(固定Q目标函数)
+        
+        \begin{itemize}
+            \item 使用具有固定权重的单独目标网络来稳定Q值更新
+            \item 每N步更新一次目标网络以减少震荡
+        \end{itemize}
+        \item Double deep Q-Learning(双深度Q学习)
+        
+        \begin{itemize}
+            \item 使用两个神经网络避免DQL中Q值被过高估计的问题
+            \item 使用DQN网络选择最佳动作
+            \item 使用目标网络计算该动作的Q值
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
 \end{document}
