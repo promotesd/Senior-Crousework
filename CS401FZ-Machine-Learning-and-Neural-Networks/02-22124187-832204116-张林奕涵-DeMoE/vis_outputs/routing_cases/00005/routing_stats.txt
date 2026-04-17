@@ -1,0 +1,25 @@
+=== Routing Statistics ===
+Num layers: 12
+Num experts: 6
+
+Average Top-1 Usage Per Expert:
+Expert 0: mean=27.917, std=12.783
+Expert 1: mean=24.667, std=20.369
+Expert 2: mean=43.917, std=15.494
+Expert 3: mean=35.333, std=27.115
+Expert 4: mean=34.750, std=16.986
+Expert 5: mean=26.417, std=14.221
+
+Per-layer Usage Matrix:
+Layer 0: [25, 36, 48, 13, 54, 17]
+Layer 1: [40, 21, 49, 11, 44, 28]
+Layer 2: [49, 31, 34, 19, 34, 26]
+Layer 3: [32, 4, 64, 43, 34, 16]
+Layer 4: [6, 16, 65, 59, 26, 21]
+Layer 5: [34, 25, 24, 4, 38, 68]
+Layer 6: [13, 7, 34, 75, 36, 28]
+Layer 7: [21, 59, 61, 21, 0, 31]
+Layer 8: [22, 69, 25, 40, 18, 19]
+Layer 9: [17, 0, 57, 21, 72, 26]
+Layer 10: [48, 15, 46, 22, 32, 30]
+Layer 11: [28, 13, 20, 96, 29, 7]

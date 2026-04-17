@@ -1,0 +1,16 @@
+0	<SOT>
+1	a
+2	large
+3	number
+4	of
+5	trees
+6	are
+7	planted
+8	on
+9	both
+10	sides
+11	of
+12	the
+13	bridge
+14	.
+15	<EOT>

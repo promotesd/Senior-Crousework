@@ -1,0 +1,11 @@
+0	<SOT>
+1	under
+2	the
+3	long
+4	bridge
+5	is
+6	a
+7	wide
+8	river
+9	.
+10	<EOT>

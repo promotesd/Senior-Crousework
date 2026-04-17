@@ -1,0 +1,29 @@
+=== Routing Entropy Statistics ===
+
+Image Branch:
+Layer 0: 1.749153
+Layer 1: 1.762113
+Layer 2: 1.746766
+Layer 3: 1.730211
+Layer 4: 1.759862
+Layer 5: 1.734437
+Layer 6: 1.750708
+Layer 7: 1.748148
+Layer 8: 1.746591
+Layer 9: 1.719563
+Layer 10: 1.753617
+Layer 11: 1.707630
+
+Text Branch:
+Layer 0: 1.779310
+Layer 1: 1.778058
+Layer 2: 1.770369
+Layer 3: 1.782593
+Layer 4: 1.775562
+Layer 5: 1.781708
+Layer 6: 1.779160
+Layer 7: 1.766442
+Layer 8: 1.774798
+Layer 9: 1.767004
+Layer 10: 1.764975
+Layer 11: 1.726545
